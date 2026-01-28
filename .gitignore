@@ -1,0 +1,17 @@
+.venv
+.python-version
+.idea
+__pycache__/
+*.pyc
+.DS_Store
+env/
+.env
+.env.*
+.vscode/
+logs/
+*.log
+coverage/
+htmlcov/
+dist/
+build/
+.github/copilot-instructions.md

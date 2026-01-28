@@ -1,0 +1,7 @@
+###Librerie per i test
+pytest
+pytest-cov
+
+###Librerie per il linting e la formattazione del codice
+ruff
+mypy
