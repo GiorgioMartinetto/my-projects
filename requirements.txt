@@ -1,7 +1,8 @@
 ###Librerie per i test
-pytest
-pytest-cov
+pytest==9.0.2
+pytest-html==4.2.0
+pytest-cov==7.0.0
 
 ###Librerie per il linting e la formattazione del codice
-ruff
-mypy
+ruff==0.14.14
+mypy==1.19.1
