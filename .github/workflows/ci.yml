@@ -24,7 +24,7 @@ jobs:
       - name: Run mypy (type checking)
         run: mypy app
       - name: Run pytest (unit tests)
-        run: pytest --cov=app --cov-report=xml --cov-config=./sonar/.coveragerc
+        run: pytest --cov=app --cov-report=xml --cov-config=.coveragerc
       - name: SonarQube Scan
         #uses: sonarsource/sonarcloud-github-action@v2 questo serve per SonarCloud
         uses: SonarSource/sonarqube-scan-action@v2 #questo serve per SonarQube self-hosted
