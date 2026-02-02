@@ -4,6 +4,8 @@ pytest
 pytest-html
 pytest-cov
 
+pysonar
+
 ###Librerie per il linting e la formattazione del codice
 ruff
 mypy

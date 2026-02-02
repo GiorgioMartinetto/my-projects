@@ -24,9 +24,10 @@ jobs:
       - name: Run mypy (type checking)
         run: mypy app
       - name: Run pytest (unit tests)
-        run: pytest --cov=app --cov-report=html
+        run: pytest --cov=app --cov-report=xml
       - name: SonarQube Scan
-        uses: sonarsource/sonarcloud-github-action@v2
+        #uses: sonarsource/sonarcloud-github-action@v2 questo serve per SonarCloud
+        uses: SonarSource/sonarqube-scan-action@v2 #questo serve per SonarQube self-hosted
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
