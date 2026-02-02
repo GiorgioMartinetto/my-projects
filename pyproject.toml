@@ -1,0 +1,38 @@
+[project]
+name = "my-projects"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "mypy==1.19.1",
+    "pysonar>=1.3.0.4086",
+    "pytest==9.0.2",
+    "pytest-cov==7.0.0",
+    "pytest-html==4.2.0",
+    "ruff==0.14.14",
+]
+
+[tool.ruff]
+line-length = 88 #lunghezza massima della linea
+target-version = "py312" #versione target di Python
+
+[tool.ruff.lint]
+select = [
+    "E",    # Errori di stile (PEP8)
+    "F",    # Errori logici (variabili non usate, import errati)
+    "I",    # Import sorting
+    "B",    # Bug potenziali (flake8-bugbear)
+    "UP",   # Migliorie sintattiche moderne
+]
+exclude = [
+    ".venv",
+    "__pycache__"
+]
+
+[tool.mypy]
+python_version = 3.12
+strict = true
+ignore_missing_imports = true
+warn_return_any = true
+disallow_untyped_defs = true
