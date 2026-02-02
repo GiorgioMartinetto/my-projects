@@ -16,4 +16,3 @@ dist/
 build/
 .github/copilot-instructions.md
 .test_reports/
-.sonar
