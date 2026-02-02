@@ -20,7 +20,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Run Ruff (linting)
-        run: ruff check app tests/plan
+        run: ruff check --fix app tests/plan
       - name: Run mypy (type checking)
         run: mypy app
       - name: Run pytest (unit tests)
