@@ -2,7 +2,7 @@
 pytest==9.0.2
 pytest-html==4.2.0
 pytest-cov==7.0.0
-pysonar
+
 
 ###Librerie per il linting e la formattazione del codice
 ruff==0.14.14

@@ -1,4 +1,4 @@
-from app.main import add
+from app.src.main import add
 
 def test_add():
     somma = add(a=2,b=3)

@@ -1,12 +1,12 @@
-name: CD Dev
+name: CD Test
 
 on:
   push:
     branches:
-      - develop
+      - 'release/*'
 
 jobs:
-  deploy-dev:
+  deploy-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,9 +23,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Deploy to Dev
+      - name: Deploy to Test
         run: |
-          echo "Deploy su ambiente DEV"
-          # esempio:
-          # docker build -t my-app:dev .
-          # docker run -d my-app:dev
+          echo "Deploy su ambiente TEST / STAGING"
+          # qui puoi:
+          # - usare Docker
+          # - pubblicare artefatti
+          # - deploy su server di test
