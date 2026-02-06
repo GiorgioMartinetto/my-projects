@@ -1,3 +1,6 @@
+pydantic==2.12.5
+python-dotenv==1.2.1
+
 ###Librerie per i test
 pytest==9.0.2
 pytest-html==4.2.0
@@ -5,6 +8,6 @@ pytest-cov==7.0.0
 
 
 ###Librerie per il linting e la formattazione del codice
-ruff==0.14.14
+ruff==0.15.0
 mypy==1.19.1
 

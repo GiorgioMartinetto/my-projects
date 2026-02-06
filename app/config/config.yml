@@ -1,0 +1,20 @@
+app:
+  name: "Product Manager"
+  host: "localhost"
+  port: 8080
+  version: "1.0.0"
+  environment: "local"
+  workers: 1
+  debug: false
+
+logging:
+  level: "INFO"
+  json_format: false
+  file_enabled: false
+  file_path: "logs/app.log"
+  rotation: "10 MB"
+  retention: "7 days"
+  backtrace: true
+  diagnose: true
+  colorize: false
+  enqueue: false
