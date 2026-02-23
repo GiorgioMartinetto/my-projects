@@ -2,7 +2,7 @@
 import importlib.resources as pkg_resources
 import os
 from pathlib import Path
-from typing import Any, ClassVar, Optional, get_args, get_origin, Literal
+from typing import Any, ClassVar, Literal, Optional, get_args, get_origin
 
 import yaml
 from dotenv import load_dotenv
@@ -13,6 +13,7 @@ VARIABLES_FILE = PROJECT_ROOT / "env" / "local.env"
 if Path(VARIABLES_FILE).exists():
     load_dotenv(dotenv_path=VARIABLES_FILE)
 
+
 class AppConfig(BaseModel):
     name: str
     host: str
@@ -21,6 +22,7 @@ class AppConfig(BaseModel):
     environment: Literal["dev", "prod"]
     workers: int
     debug: bool
+
 
 class LoggingConfig(BaseModel):
     level: str

@@ -1,18 +1,19 @@
-import sys
-import logging
 import contextvars
+import logging
+import sys
 from pathlib import Path
-from loguru import logger
-from typing import Optional
-from src.core.config import settings
-from starlette.middleware.base import BaseHTTPMiddleware
 from uuid import uuid4
 
+from loguru import logger
+from src.core.config import settings
+from starlette.middleware.base import BaseHTTPMiddleware
 
 # =============================
 # ContextVar per request_id
 # =============================
-request_id_ctx: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar("request_id", default=None)
+request_id_ctx: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "request_id", default=None
+)
 
 
 # =============================
@@ -27,7 +28,7 @@ class InterceptHandler(logging.Handler):
         logger.opt(
             exception=record.exc_info,
             depth=6,
-        ).log(level=level,message=record.getMessage())
+        ).log(level=level, message=record.getMessage())
 
 
 # =============================
@@ -121,11 +122,11 @@ def setup_logger():
 
     return logger
 
+
 # ==========================================================
 # FASTAPI MIDDLEWARE
 # ==========================================================
 class LoggingMiddleware(BaseHTTPMiddleware):
-
     async def dispatch(self, request, call_next):
         request_id = request.headers.get("X-Request-ID", str(uuid4()))
         token = request_id_ctx.set(request_id)
@@ -136,4 +137,3 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             return response
         finally:
             request_id_ctx.reset(token)
-
