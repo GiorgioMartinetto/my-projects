@@ -2,11 +2,15 @@
 import uvicorn
 from fastapi import FastAPI
 from src.core.config import settings
-from src.core.lifespan import create_product_manager_lifespan
+from src.core.logger import setup_logger, LoggingMiddleware
+
+
+logger = setup_logger()
 
 
 def create_app() -> FastAPI:
-    _app = FastAPI(title=settings.app.name, lifespan=create_product_manager_lifespan())
+    _app = FastAPI(title=settings.app.name, version=settings.app.version)
+    _app.add_middleware(LoggingMiddleware)
 
     return _app
 

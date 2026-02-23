@@ -2,7 +2,7 @@
 import importlib.resources as pkg_resources
 import os
 from pathlib import Path
-from typing import Any, ClassVar, Optional, get_args, get_origin
+from typing import Any, ClassVar, Optional, get_args, get_origin, Literal
 
 import yaml
 from dotenv import load_dotenv
@@ -13,6 +13,14 @@ VARIABLES_FILE = PROJECT_ROOT / "env" / "local.env"
 if Path(VARIABLES_FILE).exists():
     load_dotenv(dotenv_path=VARIABLES_FILE)
 
+class AppConfig(BaseModel):
+    name: str
+    host: str
+    port: int
+    version: str
+    environment: Literal["dev", "prod"]
+    workers: int
+    debug: bool
 
 class LoggingConfig(BaseModel):
     level: str
@@ -25,9 +33,11 @@ class LoggingConfig(BaseModel):
     diagnose: bool
     colorize: bool
     enqueue: bool
+    service_name: str
 
 
 class Settings(BaseModel):
+    app: AppConfig
     logging: LoggingConfig
 
     # Variabile di classe per mantenere l'istanza singleton
@@ -41,7 +51,7 @@ class Settings(BaseModel):
 
         try:
             # Use package string to satisfy type checkers
-            with pkg_resources.open_text("app.config", "config.yml") as f:
+            with pkg_resources.open_text("config", "config.yml") as f:
                 yaml_config: dict[str, Any] = yaml.safe_load(f) or {}
         except FileNotFoundError as exc:
             raise FileNotFoundError("Configuration file not found") from exc

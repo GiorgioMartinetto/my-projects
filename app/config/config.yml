@@ -3,7 +3,7 @@ app:
   host: "localhost"
   port: 8080
   version: "1.0.0"
-  environment: "local"
+  environment: "dev"
   workers: 1
   debug: false
 
@@ -18,3 +18,4 @@ logging:
   diagnose: true
   colorize: false
   enqueue: false
+  service_name: "product-manager"
