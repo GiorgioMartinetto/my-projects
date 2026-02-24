@@ -1,12 +1,15 @@
 import contextvars
 import logging
 import sys
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 from uuid import uuid4
 
-from loguru import logger
+from loguru import Logger, Record, logger
 from src.core.config import settings
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
 
 # =============================
 # ContextVar per request_id
@@ -24,18 +27,17 @@ class InterceptHandler(logging.Handler):
         try:
             level = logger.level(record.levelname).name
         except ValueError:
-            level = record.levelno
+            level = str(record.levelno)
         logger.opt(
             exception=record.exc_info,
             depth=6,
-        ).log(level=level, message=record.getMessage())
+        ).log(level, record.getMessage())
 
 
 # =============================
 # Setup Logger
 # =============================
-def setup_logger():
-
+def setup_logger() -> Logger:
     logger.remove()
 
     # -------------------------
@@ -69,7 +71,7 @@ def setup_logger():
     # REQUEST ID INJECTION
     # -------------------------
 
-    def inject_request_id(record):
+    def inject_request_id(record: Record) -> bool:
         record["extra"]["request_id"] = request_id_ctx.get()
         return True
 
@@ -127,7 +129,11 @@ def setup_logger():
 # FASTAPI MIDDLEWARE
 # ==========================================================
 class LoggingMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
+    async def dispatch(
+        self,
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+    ) -> Response:
         request_id = request.headers.get("X-Request-ID", str(uuid4()))
         token = request_id_ctx.set(request_id)
 

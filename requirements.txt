@@ -8,6 +8,8 @@ pytest-cov==7.0.0
 
 
 ###Librerie per il linting e la formattazione del codice
-ruff==0.15.0
+ruff==0.15.2
 mypy==1.19.1
 
+pyyaml
+types-pyyaml
