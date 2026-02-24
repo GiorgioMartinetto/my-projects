@@ -1,4 +1,5 @@
 # app/src/main.py
+
 import uvicorn
 from fastapi import FastAPI
 from src.core.config import settings
@@ -18,7 +19,7 @@ app = create_app()
 
 
 @app.get(path="/health_check", tags=["Health Check"])
-async def health_check() -> dict[str, str]:
+def health_check() -> dict[str, str]:
     """
     Health check endpoint to verify that the application is running.
     """
