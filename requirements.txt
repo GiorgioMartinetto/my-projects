@@ -13,4 +13,3 @@ mypy==1.19.1
 
 pyyaml
 types-pyyaml
-types-starlette
