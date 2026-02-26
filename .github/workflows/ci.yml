@@ -25,13 +25,18 @@ jobs:
         run: mypy app
       - name: Run pytest (unit tests)
         run: pytest --cov=app --cov-report=xml --cov-config=.coveragerc
+      - name: Verify coverage file
+        run: |
+          ls -la coverage.xml
+          echo "Coverage file generated successfully"
       - name: SonarQube Scan
         #uses: sonarsource/sonarcloud-github-action@v2 questo serve per SonarCloud
         uses: SonarSource/sonarqube-scan-action@v2 #questo serve per SonarQube self-hosted
         with:
           args: >
             -Dsonar.projectBaseDir=.
-            -Dsonar.projectSettings=.sonar/sonar-project.properties
+            -Dsonar.projectSettings=sonar-project.properties
+            -Dsonar.python.coverage.reportPaths=coverage.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
