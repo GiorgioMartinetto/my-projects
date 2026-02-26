@@ -93,7 +93,9 @@ class Settings(BaseModel):
             field_annotation, BaseModel
         ):
             nested_yaml = yaml_section.get(field_name, {})
-            value = cls._build_section(field_annotation, nested_yaml, field_path, missing_env_vars)
+            value = cls._build_section(
+                field_annotation, nested_yaml, field_path, missing_env_vars
+            )
             return field_name, value
 
         # Environment variable takes precedence
@@ -151,7 +153,7 @@ class Settings(BaseModel):
             model_cls=Settings,
             yaml_section=yaml_config,
             path=[],
-            missing_env_vars=missing_env_vars
+            missing_env_vars=missing_env_vars,
         )
 
         if missing_env_vars:
