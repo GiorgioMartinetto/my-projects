@@ -4,6 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from src.core.config import settings
 from src.core.logger import LoggingMiddleware, setup_logger
+from src.core.db.database import get_session, session_scope
 
 logger = setup_logger()
 

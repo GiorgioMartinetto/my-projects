@@ -5,7 +5,8 @@ from collections.abc import Awaitable, Callable
 from pathlib import Path
 from uuid import uuid4
 
-from loguru import Logger, Record, logger
+import loguru
+from loguru import logger
 from src.core.config import settings
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -37,7 +38,7 @@ class InterceptHandler(logging.Handler):
 # =============================
 # Setup Logger
 # =============================
-def setup_logger() -> Logger:
+def setup_logger() -> "loguru.Logger":
     logger.remove()
 
     # -------------------------
@@ -71,7 +72,7 @@ def setup_logger() -> Logger:
     # REQUEST ID INJECTION
     # -------------------------
 
-    def inject_request_id(record: Record) -> bool:
+    def inject_request_id(record: "loguru.Record") -> bool:
         record["extra"]["request_id"] = request_id_ctx.get()
         return True
 

@@ -1,4 +1,3 @@
-# python
 import importlib.resources as pkg_resources
 import os
 from pathlib import Path
@@ -12,7 +11,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 VARIABLES_FILE = PROJECT_ROOT / "env" / "local.env"
 if Path(VARIABLES_FILE).exists():
     load_dotenv(dotenv_path=VARIABLES_FILE)
-
 
 class AppConfig(BaseModel):
     name: str
@@ -37,10 +35,24 @@ class LoggingConfig(BaseModel):
     enqueue: bool
     service_name: str
 
+class DatabaseConfig(BaseModel):
+    driver: str
+    host: str
+    port: int
+    name: str
+    user: str
+    password: str
+    pool_size: int
+    max_overflow: int
+    pool_timeout: int
+    pool_recycle: int
+    pool_pre_ping: bool
+
 
 class Settings(BaseModel):
     app: AppConfig
     logging: LoggingConfig
+    database: DatabaseConfig
 
     # Variabile di classe per mantenere l'istanza singleton
     _instance: ClassVar[Optional["Settings"]] = None
