@@ -4,3 +4,4 @@ omit =
     */main.py
     app/src/main.py
     app/src/core/logger.py
+    app/src/core/db/database.py
