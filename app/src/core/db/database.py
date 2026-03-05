@@ -9,6 +9,7 @@ from src.core.config import settings
 
 _db_config = settings.database
 
+
 def _build_database_url() -> str:
     """
     Build the PostgreSQL DSN from the application settings.

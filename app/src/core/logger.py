@@ -129,7 +129,7 @@ def setup_logger() -> "loguru.Logger":
 # ==========================================================
 # FASTAPI MIDDLEWARE
 # ==========================================================
-class LoggingMiddleware(BaseHTTPMiddleware): # type: ignore[misc]
+class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self,
         request: Request,

@@ -1,18 +1,18 @@
 """
-    Modulo di configurazione dell'applicazione.
+Modulo di configurazione dell'applicazione.
 
-    Carica e valida le impostazioni dell'applicazione combinando un file YAML
-    (``config/config.yml``) con le variabili d'ambiente. Le variabili d'ambiente
-    hanno la precedenza sui valori definiti nel file YAML.
+Carica e valida le impostazioni dell'applicazione combinando un file YAML
+(``config/config.yml``) con le variabili d'ambiente. Le variabili d'ambiente
+hanno la precedenza sui valori definiti nel file YAML.
 
-    Il nome di ogni variabile d'ambiente è costruito concatenando i nomi delle
-    sezioni annidate in maiuscolo separati da ``_``
-    (es. ``APP_PORT``, ``DATABASE_HOST``).
+Il nome di ogni variabile d'ambiente è costruito concatenando i nomi delle
+sezioni annidate in maiuscolo separati da ``_``
+(es. ``APP_PORT``, ``DATABASE_HOST``).
 
-    All'avvio del modulo viene tentata la creazione di un'istanza singleton
-    ``settings`` di :class:`Settings`. Se il file di configurazione non viene
-    trovato (ad es. durante l'esecuzione dei test), ``settings`` viene impostato
-    a ``None``.
+All'avvio del modulo viene tentata la creazione di un'istanza singleton
+``settings`` di :class:`Settings`. Se il file di configurazione non viene
+trovato (ad es. durante l'esecuzione dei test), ``settings`` viene impostato
+a ``None``.
 """
 
 import importlib.resources as pkg_resources

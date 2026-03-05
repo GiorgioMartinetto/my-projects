@@ -34,7 +34,8 @@ def clean_env() -> Generator[None, None, None]:
 
     # Remove all APP_, LOGGING_, and DATABASE_ env vars
     keys_to_remove = [
-        key for key in os.environ.keys()
+        key
+        for key in os.environ.keys()
         if key.startswith(("APP_", "LOGGING_", "DATABASE_"))
     ]
     for key in keys_to_remove:
@@ -328,8 +329,7 @@ class TestDatabaseConfig:
             )  # type: ignore
         errors_str = str(exc_info.value).lower()
         assert any(
-            field in errors_str
-            for field in ["port", "user", "password", "pool_size"]
+            field in errors_str for field in ["port", "user", "password", "pool_size"]
         )
 
 
@@ -831,4 +831,3 @@ class TestSettings:
             assert settings.database.pool_timeout == 90
             assert settings.database.pool_recycle == 14400
             assert settings.database.pool_pre_ping is False
-
