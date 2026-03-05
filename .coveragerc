@@ -3,6 +3,5 @@ relative_files = True
 omit =
     */main.py
     app/src/main.py
-    */logger.py
     app/src/core/logger.py
-    */core/logger.py
+    app/src/core/db/database.py

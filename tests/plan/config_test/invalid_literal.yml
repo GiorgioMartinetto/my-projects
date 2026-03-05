@@ -1,9 +1,9 @@
 app:
-  name: "Product Manager"
-  host: "localhost"
+  name: "Test App"
+  host: "127.0.0.1"
   port: 8080
   version: "1.0.0"
-  environment: "dev"
+  environment: "staging"  # Should be "dev" or "prod"
   workers: 1
   debug: false
 
@@ -18,4 +18,5 @@ logging:
   diagnose: true
   colorize: false
   enqueue: false
-  service_name: "product-manager"
+  service_name: "test-service"
+

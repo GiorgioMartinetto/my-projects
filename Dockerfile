@@ -1,6 +1,6 @@
-LABEL authors="Giorgio"
+LABEL authors="Giorgio Martinetto"
 
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
