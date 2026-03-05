@@ -20,7 +20,7 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from app.src.core.config import AppConfig, LoggingConfig, Settings
+from app.src.core.config import AppConfig, DatabaseConfig, LoggingConfig, Settings
 
 # Path to test configuration files
 TEST_CONFIG_DIR = Path(__file__).parent / "config_test"
@@ -32,9 +32,10 @@ def clean_env() -> Generator[None, None, None]:
     # Store original env vars
     original_env = os.environ.copy()
 
-    # Remove all APP_ and LOGGING_ env vars
+    # Remove all APP_, LOGGING_, and DATABASE_ env vars
     keys_to_remove = [
-        key for key in os.environ.keys() if key.startswith(("APP_", "LOGGING_"))
+        key for key in os.environ.keys()
+        if key.startswith(("APP_", "LOGGING_", "DATABASE_"))
     ]
     for key in keys_to_remove:
         del os.environ[key]
@@ -77,6 +78,19 @@ def valid_yaml_config() -> dict[str, Any]:
             "colorize": True,
             "enqueue": True,
             "service_name": "test-service",
+        },
+        "database": {
+            "driver": "postgresql",
+            "host": "db.test.com",
+            "port": 5432,
+            "name": "testdb",
+            "user": "testuser",
+            "password": "not_a_real_password",
+            "pool_size": 10,
+            "max_overflow": 20,
+            "pool_timeout": 60,
+            "pool_recycle": 7200,
+            "pool_pre_ping": True,
         },
     }
 
@@ -201,6 +215,124 @@ class TestLoggingConfig:
         )
 
 
+class TestDatabaseConfig:
+    """Test DatabaseConfig model."""
+
+    def test_valid_database_config(self) -> None:
+        """Test creating DatabaseConfig with valid data."""
+        config = DatabaseConfig(
+            driver="postgresql",
+            host="localhost",
+            port=5432,
+            name="mydb",
+            user="dbuser",
+            password="not_a_real_password",
+            pool_size=5,
+            max_overflow=10,
+            pool_timeout=30,
+            pool_recycle=3600,
+            pool_pre_ping=True,
+        )
+        assert config.driver == "postgresql"
+        assert config.host == "localhost"
+        assert config.port == 5432
+        assert config.name == "mydb"
+        assert config.user == "dbuser"
+        assert config.password == "not_a_real_password"
+        assert config.pool_size == 5
+        assert config.max_overflow == 10
+        assert config.pool_timeout == 30
+        assert config.pool_recycle == 3600
+        assert config.pool_pre_ping is True
+
+    def test_invalid_port_type(self) -> None:
+        """Test that invalid port type raises ValidationError."""
+        with pytest.raises(ValidationError) as exc_info:
+            DatabaseConfig(
+                driver="postgresql",
+                host="localhost",
+                port="not_a_number",  # type: ignore
+                name="mydb",
+                user="dbuser",
+                password="not_a_real_password",
+                pool_size=5,
+                max_overflow=10,
+                pool_timeout=30,
+                pool_recycle=3600,
+                pool_pre_ping=True,
+            )
+        assert "port" in str(exc_info.value).lower()
+
+    def test_invalid_pool_size_type(self) -> None:
+        """Test that invalid pool_size type raises ValidationError."""
+        with pytest.raises(ValidationError) as exc_info:
+            DatabaseConfig(
+                driver="postgresql",
+                host="localhost",
+                port=5432,
+                name="mydb",
+                user="dbuser",
+                password="not_a_real_password",
+                pool_size="invalid",  # type: ignore
+                max_overflow=10,
+                pool_timeout=30,
+                pool_recycle=3600,
+                pool_pre_ping=True,
+            )
+        assert "pool_size" in str(exc_info.value).lower()
+
+    def test_invalid_pool_pre_ping_type(self) -> None:
+        """Test that invalid pool_pre_ping type raises ValidationError."""
+        with pytest.raises(ValidationError) as exc_info:
+            DatabaseConfig(
+                driver="postgresql",
+                host="localhost",
+                port=5432,
+                name="mydb",
+                user="dbuser",
+                password="not_a_real_password",
+                pool_size=5,
+                max_overflow=10,
+                pool_timeout=30,
+                pool_recycle=3600,
+                pool_pre_ping="not_a_bool",  # type: ignore
+            )
+        assert "pool_pre_ping" in str(exc_info.value).lower()
+
+    def test_missing_required_field(self) -> None:
+        """Test that missing required field raises ValidationError."""
+        with pytest.raises(ValidationError) as exc_info:
+            DatabaseConfig(
+                driver="postgresql",
+                host="localhost",
+                # port is missing
+                name="mydb",
+                user="dbuser",
+                password="not_a_real_password",
+                pool_size=5,
+                max_overflow=10,
+                pool_timeout=30,
+                pool_recycle=3600,
+                pool_pre_ping=True,
+            )  # type: ignore
+        assert "port" in str(exc_info.value).lower()
+
+    def test_missing_multiple_fields(self) -> None:
+        """Test that missing multiple fields raises ValidationError."""
+        with pytest.raises(ValidationError) as exc_info:
+            DatabaseConfig(
+                driver="postgresql",
+                host="localhost",
+                # Missing several required fields
+                name="mydb",
+            )  # type: ignore
+        errors_str = str(exc_info.value).lower()
+        assert any(
+            field in errors_str
+            for field in ["port", "user", "password", "pool_size"]
+        )
+
+
 class TestSettings:
     """Test Settings class and from_yaml_env method."""
 
@@ -219,6 +351,14 @@ class TestSettings:
             assert settings.app.environment == "prod"
             assert settings.logging.level == "DEBUG"
             assert settings.logging.json_format is True
+            assert settings.database.driver == "postgresql"
+            assert settings.database.host == "db.test.com"
+            assert settings.database.port == 5432
+            assert settings.database.name == "testdb"
+            assert settings.database.user == "testuser"
+            assert settings.database.password == "not_a_real_password"
+            assert settings.database.pool_size == 10
+            assert settings.database.max_overflow == 20
 
     def test_environment_variable_override(
         self, clean_env: None, valid_yaml_config: dict[str, Any]
@@ -227,6 +367,8 @@ class TestSettings:
         os.environ["APP_PORT"] = "7777"
         os.environ["APP_DEBUG"] = "true"
         os.environ["LOGGING_LEVEL"] = "ERROR"
+        os.environ["DATABASE_PORT"] = "3306"
+        os.environ["DATABASE_POOL_SIZE"] = "15"
 
         yaml_content = yaml.dump(valid_yaml_config)
 
@@ -237,10 +379,14 @@ class TestSettings:
             assert settings.app.port == 7777
             assert settings.app.debug is True
             assert settings.logging.level == "ERROR"
+            assert settings.database.port == 3306
+            assert settings.database.pool_size == 15
 
             # Check YAML values still present for non-overridden fields
             assert settings.app.name == "Test App"
             assert settings.app.host == "127.0.0.1"
+            assert settings.database.driver == "postgresql"
+            assert settings.database.host == "db.test.com"
 
     def test_boolean_environment_variable_parsing(
         self, clean_env: None, valid_yaml_config: dict[str, Any]
@@ -351,6 +497,19 @@ class TestSettings:
                 "enqueue": False,
                 "service_name": "test-service",
             },
+            "database": {
+                "driver": "postgresql",
+                "host": "localhost",
+                "port": 5432,
+                "name": "testdb",
+                "user": "testuser",
+                "password": "not_a_real_password",
+                "pool_size": 5,
+                "max_overflow": 10,
+                "pool_timeout": 30,
+                "pool_recycle": 3600,
+                "pool_pre_ping": True,
+            },
         }
 
         yaml_content = yaml.dump(invalid_config)
@@ -385,6 +544,19 @@ class TestSettings:
                 "colorize": False,
                 "enqueue": False,
                 "service_name": "test-service",
+            },
+            "database": {
+                "driver": "postgresql",
+                "host": "localhost",
+                "port": 5432,
+                "name": "testdb",
+                "user": "testuser",
+                "password": "not_a_real_password",
+                "pool_size": 5,
+                "max_overflow": 10,
+                "pool_timeout": 30,
+                "pool_recycle": 3600,
+                "pool_pre_ping": True,
             },
         }
 
@@ -485,6 +657,19 @@ class TestSettings:
                 "enqueue": False,
                 "service_name": "test-service",
             },
+            "database": {
+                "driver": "postgresql",
+                "host": "localhost",
+                "port": 5432,
+                "name": "testdb",
+                "user": "testuser",
+                "password": "not_a_real_password",
+                "pool_size": 5,
+                "max_overflow": 10,
+                "pool_timeout": 30,
+                "pool_recycle": 3600,
+                "pool_pre_ping": True,
+            },
         }
 
         yaml_content = yaml.dump(config_with_none)
@@ -531,12 +716,27 @@ class TestSettings:
                 "enqueue": False,
                 "service_name": "partial-service",
             },
+            "database": {
+                "driver": "postgresql",
+                "host": "partial.db.com",
+                # port will come from env
+                "name": "partialdb",
+                "user": "partialuser",
+                "password": "not_a_real_password",
+                # pool_size will come from env
+                "max_overflow": 15,
+                "pool_timeout": 45,
+                "pool_recycle": 5400,
+                "pool_pre_ping": True,
+            },
         }
 
         # Set missing fields via environment
         os.environ["APP_PORT"] = "5000"
         os.environ["APP_WORKERS"] = "2"
         os.environ["LOGGING_LEVEL"] = "WARNING"
+        os.environ["DATABASE_PORT"] = "5433"
+        os.environ["DATABASE_POOL_SIZE"] = "8"
 
         yaml_content = yaml.dump(partial_yaml_config)
 
@@ -547,11 +747,16 @@ class TestSettings:
             assert settings.app.name == "Partial App"
             assert settings.app.host == "localhost"
             assert settings.app.debug is False
+            assert settings.database.driver == "postgresql"
+            assert settings.database.host == "partial.db.com"
+            assert settings.database.name == "partialdb"
 
             # Check env values
             assert settings.app.port == 5000
             assert settings.app.workers == 2
             assert settings.logging.level == "WARNING"
+            assert settings.database.port == 5433
+            assert settings.database.pool_size == 8
 
     def test_all_values_from_environment(self, clean_env: None) -> None:
         """Test loading all config values from environment variables."""
@@ -575,6 +780,18 @@ class TestSettings:
         os.environ["LOGGING_COLORIZE"] = "true"
         os.environ["LOGGING_ENQUEUE"] = "true"
         os.environ["LOGGING_SERVICE_NAME"] = "env-service"
+
+        os.environ["DATABASE_DRIVER"] = "mysql"
+        os.environ["DATABASE_HOST"] = "db.example.com"
+        os.environ["DATABASE_PORT"] = "3306"
+        os.environ["DATABASE_NAME"] = "envdb"
+        os.environ["DATABASE_USER"] = "envuser"
+        os.environ["DATABASE_PASSWORD"] = "not_a_real_password"
+        os.environ["DATABASE_POOL_SIZE"] = "20"
+        os.environ["DATABASE_MAX_OVERFLOW"] = "30"
+        os.environ["DATABASE_POOL_TIMEOUT"] = "90"
+        os.environ["DATABASE_POOL_RECYCLE"] = "14400"
+        os.environ["DATABASE_POOL_PRE_PING"] = "false"
 
         # Empty YAML
         yaml_content = yaml.dump({})
@@ -602,3 +819,16 @@ class TestSettings:
             assert settings.logging.colorize is True
             assert settings.logging.enqueue is True
             assert settings.logging.service_name == "env-service"
+
+            assert settings.database.driver == "mysql"
+            assert settings.database.host == "db.example.com"
+            assert settings.database.port == 3306
+            assert settings.database.name == "envdb"
+            assert settings.database.user == "envuser"
+            assert settings.database.password == "not_a_real_password"
+            assert settings.database.pool_size == 20
+            assert settings.database.max_overflow == 30
+            assert settings.database.pool_timeout == 90
+            assert settings.database.pool_recycle == 14400
+            assert settings.database.pool_pre_ping is False
+

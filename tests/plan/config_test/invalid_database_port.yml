@@ -23,7 +23,7 @@ logging:
 database:
   driver: "postgresql"
   host: "db.test.com"
-  port: 5432
+  port: "invalid_port"  # Invalid: should be integer
   name: "testdb"
   user: "testuser"
   password: "testpass"
@@ -32,3 +32,4 @@ database:
   pool_timeout: 60
   pool_recycle: 7200
   pool_pre_ping: true
+
