@@ -1,13 +1,12 @@
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
-
 from src.core.db.model import Base
 
 
-class User(Base):
+class TbUser(Base):
     """
     User model for authentication and user management.
 
@@ -18,35 +17,21 @@ class User(Base):
         created_at: Timestamp when the user was created
         is_active: Flag to indicate if the user account is active
     """
+
     __tablename__ = "users"
 
     id: Mapped[str] = mapped_column(
-        String(36),
-        primary_key=True,
-        default=lambda: str(uuid4()),
-        nullable=False
+        String(36), primary_key=True, default=lambda: str(uuid4()), nullable=False
     )
     email: Mapped[str] = mapped_column(
-        String(255),
-        unique=True,
-        nullable=False,
-        index=True
+        String(255), unique=True, nullable=False, index=True
     )
-    password_hash: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False
-    )
+    username: Mapped[str] = mapped_column(String(255), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
-    is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        default=True,
-        nullable=False
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, email={self.email}, is_active={self.is_active})>"
-

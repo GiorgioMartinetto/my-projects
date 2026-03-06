@@ -27,3 +27,6 @@ mypy==1.19.1
 pre-commit
 
 types-pyyaml
+
+bcrypt==5.0.0
+

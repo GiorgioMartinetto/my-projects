@@ -2,20 +2,20 @@
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from src.core.config import settings
 from src.core.exception_handlers import (
     email_already_exists_handlers,
-    user_not_found_handlers,
     invalid_credentials_handlers,
+    unhandled_exception_handler,
+    user_not_found_handlers,
     validation_error_handler,
-    unhandled_exception_handler
 )
-from fastapi.exceptions import RequestValidationError
 from src.core.logger import LoggingMiddleware, setup_logger
 from src.exceptions.user_exception import (
     EmailAlreadyExistsException,
-    UserNotFoundException,
     InvalidCredentialsException,
+    UserNotFoundException,
 )
 from src.routers.v1.user_endpoint import user_router
 
@@ -28,11 +28,15 @@ def create_app() -> FastAPI:
     _app.include_router(router=user_router)
 
     # Domain-specific exception handlers
-    _app.add_exception_handler(EmailAlreadyExistsException, email_already_exists_handlers)
+    _app.add_exception_handler(
+        EmailAlreadyExistsException, email_already_exists_handlers
+    )
     _app.add_exception_handler(UserNotFoundException, user_not_found_handlers)
-    _app.add_exception_handler(InvalidCredentialsException, invalid_credentials_handlers)
+    _app.add_exception_handler(
+        InvalidCredentialsException, invalid_credentials_handlers
+    )
 
-    #Pydantic validation error handler
+    # Pydantic validation error handler
     _app.add_exception_handler(RequestValidationError, validation_error_handler)
 
     _app.add_exception_handler(Exception, unhandled_exception_handler)

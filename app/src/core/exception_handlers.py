@@ -1,54 +1,55 @@
-from loguru import logger
-
 from fastapi import Request
-from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
-
+from fastapi.responses import JSONResponse
+from loguru import logger
 from src.exceptions.user_exception import (
     EmailAlreadyExistsException,
-    UserNotFoundException,
     InvalidCredentialsException,
+    UserNotFoundException,
 )
 
 
-def email_already_exists_handlers(request: Request, exc: EmailAlreadyExistsException) -> JSONResponse:
+def email_already_exists_handlers(
+    request: Request, exc: EmailAlreadyExistsException
+) -> JSONResponse:
     logger.warning(
-        "Email already exists | path: {} context: {}",
-        request.url.path,
-        exc.context
+        "Email already exists | path: {} context: {}", request.url.path, exc.context
     )
     return JSONResponse(
         status_code=409,
-        content={"detail": "Email already exists.", "code":"EMAIL_ALREADY_EXISTS"},
+        content={"detail": "Email already exists.", "code": "EMAIL_ALREADY_EXISTS"},
     )
 
-def user_not_found_handlers(request: Request, exc: UserNotFoundException) -> JSONResponse:
+
+def user_not_found_handlers(
+    request: Request, exc: UserNotFoundException
+) -> JSONResponse:
     logger.warning(
-        "User not found | path: {} context: {}",
-        request.url.path,
-        exc.context
+        "User not found | path: {} context: {}", request.url.path, exc.context
     )
     return JSONResponse(
         status_code=404,
-        content={"detail": "User already exists.", "code":"USER_NOT_FOUND"},
+        content={"detail": "User already exists.", "code": "USER_NOT_FOUND"},
     )
 
-def invalid_credentials_handlers(request: Request, exc: InvalidCredentialsException) -> JSONResponse:
+
+def invalid_credentials_handlers(
+    request: Request, exc: InvalidCredentialsException
+) -> JSONResponse:
     logger.warning(
-        "Invalid credential | path: {} context: {}",
-        request.url.path,
-        exc.context
+        "Invalid credential | path: {} context: {}", request.url.path, exc.context
     )
     return JSONResponse(
         status_code=401,
-        content={"detail": "Invalid credentials.", "code":"INVALID_CREDENTIALS"},
+        content={"detail": "Invalid credentials.", "code": "INVALID_CREDENTIALS"},
     )
+
 
 def validation_error_handler(
     request: Request, exc: RequestValidationError
 ) -> JSONResponse:
     errors = [
-        {"field": ".".join(str(l) for l in e["loc"][1:]), "message": e["msg"]}
+        {"field": ".".join(str(loc) for loc in e["loc"][1:]), "message": e["msg"]}
         for e in exc.errors()
     ]
     logger.info(
@@ -61,14 +62,13 @@ def validation_error_handler(
         content={"detail": errors, "code": "VALIDATION_ERROR"},
     )
 
-def unhandled_exception_handler(
-    request: Request, exc: Exception
-) -> JSONResponse:
+
+def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     logger.exception(  # ← include automaticamente lo stack trace in loguru
         "Errore imprevisto non gestito | path={} method={} context={}",
         request.url.path,
         request.method,
-        exc.__context__
+        exc,
     )
     return JSONResponse(
         status_code=500,

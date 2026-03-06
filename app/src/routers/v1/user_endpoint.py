@@ -1,14 +1,14 @@
 from fastapi import APIRouter
-from starlette import status
-
 from src.schemas.user_request import UserRegisterRequest
 from src.schemas.user_response import UserRegisterResponse
 from src.services.users.user_service import register_user
+from starlette import status
 
 user_router = APIRouter(
     prefix="/users",
     tags=["users"],
 )
+
 
 @user_router.post(
     path="/registration",
@@ -26,7 +26,6 @@ async def registration(user: UserRegisterRequest) -> UserRegisterResponse:
     Returns:
         UserCreationResponse - The created user's details.
     """
-    user_created = await register_user(user = user)
+    user_created = await register_user(payload=user)
 
-    return UserRegisterResponse.model_validate(user_created)
-
+    return user_created

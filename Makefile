@@ -16,6 +16,7 @@ format:
 
 all:
 	@echo "Running all tasks..."
-	$(MAKE) check
 	$(MAKE) format
+	$(MAKE) check
+
 
