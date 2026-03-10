@@ -25,5 +25,6 @@ class UserLoginResponse(BaseModel):
     message: str
     email: str
 
+
 class UserLogoutResponse(BaseModel):
     message: str

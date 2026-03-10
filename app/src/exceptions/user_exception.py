@@ -24,3 +24,9 @@ class InvalidCredentialsException(AppBaseException):
     """Exception raised when the provided credentials are invalid."""
 
     pass
+
+
+class InvalidTokenException(AppBaseException):
+    """Exception raised when the provided token is invalid."""
+
+    pass

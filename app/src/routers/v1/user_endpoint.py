@@ -1,12 +1,18 @@
 from datetime import timedelta
+from typing import Annotated
 
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, Depends
+from loguru import logger
 from src.core.config import settings
 from src.core.security import create_access_token
 from src.exceptions.user_exception import InvalidCredentialsException
+from src.routers.deps import get_current_user
 from src.schemas.user_request import UserLoginRequest, UserRegisterRequest
-from src.schemas.user_response import UserLoginResponse, UserRegisterResponse, \
-    UserLogoutResponse
+from src.schemas.user_response import (
+    UserLoginResponse,
+    UserLogoutResponse,
+    UserRegisterResponse,
+)
 from src.services.users.user_service import authenticate_user, register_user
 from starlette import status
 
@@ -34,7 +40,7 @@ async def registration(user: UserRegisterRequest) -> UserRegisterResponse:
         UserCreationResponse - The created user's details.
     """
     user_created = await register_user(payload=user)
-
+    logger.success("User registered successfully: {}", user_created.user.email)
     return user_created
 
 
@@ -67,6 +73,7 @@ async def login(response: Response, user: UserLoginRequest) -> UserLoginResponse
         samesite=settings.token.same_site,
         max_age=settings.token.expiration * 60,
     )
+    logger.success("User logged in: {}", user.email)
     return user
 
 
@@ -89,7 +96,26 @@ async def logout(response: Response) -> UserLogoutResponse:
     """
     # Invalidate the access token by setting an expired cookie
     response.delete_cookie(key="access_token")
+    logger.success("User logged out successfully.")
     return UserLogoutResponse.model_validate(
         {"message": "User logged out successfully."}
     )
 
+@user_router.get(
+    path="/profile",
+    tags=["Profile"],
+    status_code=status.HTTP_200_OK,
+    summary="Get user profile",
+    description="Endpoint to retrieve the profile information of the currently authenticated user.",
+)
+async def get_profile(current_user: Annotated[dict, Depends(get_current_user)]) -> dict:
+    """
+    Get the profile information of the currently authenticated user.
+
+    Args:
+        current_user: dict - The current authenticated user's information.
+
+    Returns:
+        dict - The profile information of the user.
+    """
+    return {"email": current_user["username"], "details": current_user["payload"]}

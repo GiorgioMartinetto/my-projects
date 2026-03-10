@@ -8,6 +8,7 @@ from src.exceptions.user_exception import (
     PasswordAndConfirmPasswordNotMatchException,
     UserNotFoundException,
 )
+from starlette import status
 
 
 def email_already_exists_handlers(
@@ -17,7 +18,7 @@ def email_already_exists_handlers(
         "Email already exists | path: {} context: {}", request.url.path, exc.context
     )
     return JSONResponse(
-        status_code=409,
+        status_code=status.HTTP_409_CONFLICT,
         content={"detail": "Email already exists.", "code": "EMAIL_ALREADY_EXISTS"},
     )
 
@@ -29,7 +30,7 @@ def user_not_found_handlers(
         "User not found | path: {} context: {}", request.url.path, exc.context
     )
     return JSONResponse(
-        status_code=404,
+        status_code=status.HTTP_404_NOT_FOUND,
         content={"detail": "User already exists.", "code": "USER_NOT_FOUND"},
     )
 
@@ -43,11 +44,22 @@ def password_and_confirm_password_not_match_handlers(
         exc.context,
     )
     return JSONResponse(
-        status_code=400,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content={
             "detail": "Password and confirm password do not match.",
             "code": "PASSWORD_CONFIRM_PASSWORD_NOT_MATCH",
         },
+    )
+
+def invalid_token_handlers(
+    request: Request, exc: InvalidCredentialsException
+) -> JSONResponse:
+    logger.warning(
+        "Invalid token | path: {} context: {}", request.url.path, exc.context
+    )
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={"detail": "Invalid token.", "code": "INVALID_TOKEN"},
     )
 
 
@@ -58,7 +70,7 @@ def invalid_credentials_handlers(
         "Invalid credential | path: {} context: {}", request.url.path, exc.context
     )
     return JSONResponse(
-        status_code=401,
+        status_code=status.HTTP_401_UNAUTHORIZED,
         content={"detail": "Invalid credentials.", "code": "INVALID_CREDENTIALS"},
     )
 
@@ -76,7 +88,7 @@ def validation_error_handler(
         errors,
     )
     return JSONResponse(
-        status_code=422,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content={"detail": errors, "code": "VALIDATION_ERROR"},
     )
 
@@ -89,6 +101,6 @@ def unhandled_exception_handler(request: Request, exc: Exception) -> JSONRespons
         exc,
     )
     return JSONResponse(
-        status_code=500,
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "Internal server error.", "code": "INTERNAL_ERROR"},
     )

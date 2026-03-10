@@ -7,17 +7,24 @@ from src.core.config import settings
 
 
 # Hash a password using bcrypt
-def hash_password(password: str) -> bytes:
+def hash_password(password: str) -> str:
     pwd_bytes = password.encode("utf-8")
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password=pwd_bytes, salt=salt)
-    return hashed_password
+    return hashed_password.decode("utf-8")
 
 
 # Check if the provided password matches the stored password (hashed)
-def verify_password(plain_password: str, hashed_password: bytes) -> bool:
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     password_byte_enc = plain_password.encode("utf-8")
-    return bcrypt.checkpw(password=password_byte_enc, hashed_password=hashed_password)
+    if isinstance(hashed_password, str):
+        hashed_password_bytes = hashed_password.encode("utf-8")
+    else:
+        hashed_password_bytes = hashed_password
+
+    return bcrypt.checkpw(
+        password=password_byte_enc, hashed_password=hashed_password_bytes
+    )
 
 
 def create_access_token(

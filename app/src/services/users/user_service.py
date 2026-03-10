@@ -1,3 +1,4 @@
+
 from src.core.db.database import session_scope
 from src.core.db.model.tb_user import TbUser
 from src.core.db.repository.tb_user_repository import UserRepository
@@ -63,11 +64,13 @@ async def _safe_authenticate_user(email: str, password: str) -> bool:
         user = await repo.get_user_by_email(email=email)
         if not user:
             return False
-    check: bool = verify_password(
+        password_str = str(user.password_hash)
+
+    check_auth: bool = verify_password(
         plain_password=password,
-        hashed_password=user.hashed_password,
+        hashed_password=password_str,
     )
-    return check
+    return check_auth
 
 
 async def register_user(payload: UserRegisterRequest) -> UserRegisterResponse:
