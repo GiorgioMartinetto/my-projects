@@ -5,6 +5,7 @@ from loguru import logger
 from src.exceptions.user_exception import (
     EmailAlreadyExistsException,
     InvalidCredentialsException,
+    PasswordAndConfirmPasswordNotMatchException,
     UserNotFoundException,
 )
 
@@ -30,6 +31,23 @@ def user_not_found_handlers(
     return JSONResponse(
         status_code=404,
         content={"detail": "User already exists.", "code": "USER_NOT_FOUND"},
+    )
+
+
+def password_and_confirm_password_not_match_handlers(
+    request: Request, exc: PasswordAndConfirmPasswordNotMatchException
+) -> JSONResponse:
+    logger.warning(
+        "Password and confirm password do not match | path: {} context: {}",
+        request.url.path,
+        exc.context,
+    )
+    return JSONResponse(
+        status_code=400,
+        content={
+            "detail": "Password and confirm password do not match.",
+            "code": "PASSWORD_CONFIRM_PASSWORD_NOT_MATCH",
+        },
     )
 
 

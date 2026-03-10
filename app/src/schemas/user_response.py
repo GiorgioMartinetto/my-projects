@@ -19,3 +19,11 @@ class UserResponse(BaseModel):
 class UserRegisterResponse(BaseModel):
     message: str
     user: UserResponse
+
+
+class UserLoginResponse(BaseModel):
+    message: str
+    email: str
+
+class UserLogoutResponse(BaseModel):
+    message: str

@@ -8,6 +8,12 @@ class EmailAlreadyExistsException(AppBaseException):
     pass
 
 
+class PasswordAndConfirmPasswordNotMatchException(AppBaseException):
+    """Exception raised when the provided password and confirm password do not match."""
+
+    pass
+
+
 class UserNotFoundException(AppBaseException):
     """Exception raised when trying to create a user that already exists."""
 

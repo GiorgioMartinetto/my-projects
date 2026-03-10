@@ -4,29 +4,30 @@ uvicorn==0.41.0
 pydantic==2.12.5
 pydantic[email]==2.12.5
 
-
 python-dotenv==1.2.2
 
 loguru==0.7.3
-loguru-mypy==0.0.4
 
 sqlalchemy==2.0.48
 psycopg2===2.9.11
+
+###Librerie per la sicurezza e l'autenticazione
+python-jose
+bcrypt==5.0.0
+
+###Librerie per il linting e la formattazione del codice
+ruff==0.15.5
+mypy==1.19.1
+loguru-mypy==0.0.4
+pysonar
+pre-commit
+types-pyyaml
 
 ###Librerie per i test
 pytest==9.0.2
 pytest-html==4.2.0
 pytest-cov==7.0.0
 
-pysonar
 
-###Librerie per il linting e la formattazione del codice
-ruff==0.15.4
-mypy==1.19.1
 
-pre-commit
-
-types-pyyaml
-
-bcrypt==5.0.0
 

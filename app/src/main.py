@@ -7,6 +7,7 @@ from src.core.config import settings
 from src.core.exception_handlers import (
     email_already_exists_handlers,
     invalid_credentials_handlers,
+    password_and_confirm_password_not_match_handlers,
     unhandled_exception_handler,
     user_not_found_handlers,
     validation_error_handler,
@@ -15,6 +16,7 @@ from src.core.logger import LoggingMiddleware, setup_logger
 from src.exceptions.user_exception import (
     EmailAlreadyExistsException,
     InvalidCredentialsException,
+    PasswordAndConfirmPasswordNotMatchException,
     UserNotFoundException,
 )
 from src.routers.v1.user_endpoint import user_router
@@ -34,6 +36,10 @@ def create_app() -> FastAPI:
     _app.add_exception_handler(UserNotFoundException, user_not_found_handlers)
     _app.add_exception_handler(
         InvalidCredentialsException, invalid_credentials_handlers
+    )
+    _app.add_exception_handler(
+        PasswordAndConfirmPasswordNotMatchException,
+        password_and_confirm_password_not_match_handlers,
     )
 
     # Pydantic validation error handler

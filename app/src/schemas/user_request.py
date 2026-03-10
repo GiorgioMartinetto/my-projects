@@ -5,6 +5,7 @@ class UserRegisterRequest(BaseModel):
     email: EmailStr
     name: str
     password: str
+    confirm_password: str
 
     @field_validator("password")
     def validate_password_strength(cls, value: str) -> str:
@@ -26,3 +27,8 @@ class UserRegisterRequest(BaseModel):
         if len(v) < 2:
             raise ValueError("Name must be at least 2 characters long.")
         return v
+
+
+class UserLoginRequest(BaseModel):
+    email: EmailStr
+    password: str

@@ -112,6 +112,15 @@ class DatabaseConfig(BaseModel):
     pool_pre_ping: bool
 
 
+class TokenConfig(BaseModel):
+    secret_key: str
+    algorithm: str
+    http_only: bool
+    secure: bool
+    same_site: Literal["lax", "strict", "none"]
+    expiration: int
+
+
 class Settings(BaseModel):
     """Impostazioni globali dell'applicazione (singleton).
 
@@ -128,6 +137,7 @@ class Settings(BaseModel):
     app: AppConfig
     logging: LoggingConfig
     database: DatabaseConfig
+    token: TokenConfig
 
     # Variabile di classe per mantenere l'istanza singleton
     _instance: ClassVar[Optional["Settings"]] = None

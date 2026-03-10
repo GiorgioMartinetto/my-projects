@@ -1,13 +1,15 @@
 from src.core.db.database import session_scope
 from src.core.db.model.tb_user import TbUser
 from src.core.db.repository.tb_user_repository import UserRepository
-from src.core.security import hash_password
-
-from src.exceptions.user_exception import EmailAlreadyExistsException
+from src.core.security import hash_password, verify_password
+from src.exceptions.user_exception import (
+    EmailAlreadyExistsException,
+    PasswordAndConfirmPasswordNotMatchException,
+)
 from src.routers.v1.user_endpoint import UserRegisterRequest
-from src.schemas.user_response import UserRegisterResponse
+from src.schemas.user_response import UserLoginResponse, UserRegisterResponse
 
-from loguru import logger
+
 async def _safe_existing_user(email: str) -> bool:
     """
     Verifica se un utente con l'email specificata esiste già nel database.
@@ -55,6 +57,19 @@ async def _safe_create_user(email: str, username: str, password: str) -> TbUser:
         return new_user
 
 
+async def _safe_authenticate_user(email: str, password: str) -> bool:
+    with session_scope() as session:
+        repo = UserRepository(session)
+        user = await repo.get_user_by_email(email=email)
+        if not user:
+            return False
+    check: bool = verify_password(
+        plain_password=password,
+        hashed_password=user.hashed_password,
+    )
+    return check
+
+
 async def register_user(payload: UserRegisterRequest) -> UserRegisterResponse:
     """
     Registra un nuovo utente nel sistema.
@@ -86,12 +101,17 @@ async def register_user(payload: UserRegisterRequest) -> UserRegisterResponse:
             message=f"Email {payload.email} already exists.",
             context={"email": payload.email},
         )
+
+    if payload.password != payload.confirm_password:
+        raise PasswordAndConfirmPasswordNotMatchException(
+            message="Password and confirm password do not match.",
+            context={"email": payload.email},
+        )
+
     hashed_password = hash_password(payload.password)
 
     new_user = await _safe_create_user(
-        email = payload.email,
-        username = payload.name,
-        password = hashed_password
+        email=payload.email, username=payload.name, password=hashed_password
     )
 
     return UserRegisterResponse.model_validate(
@@ -101,3 +121,17 @@ async def register_user(payload: UserRegisterRequest) -> UserRegisterResponse:
         }
     )
 
+
+async def authenticate_user(email: str, password: str) -> UserLoginResponse | None:
+    existing = await _safe_existing_user(email=email)
+    authenticated = await _safe_authenticate_user(email=email, password=password)
+
+    if not existing or not authenticated:
+        return None
+
+    return UserLoginResponse.model_validate(
+        {
+            "message": "User authenticated successfully.",
+            "email": email,
+        }
+    )
