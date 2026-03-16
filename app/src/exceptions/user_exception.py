@@ -30,3 +30,10 @@ class InvalidTokenException(AppBaseException):
     """Exception raised when the provided token is invalid."""
 
     pass
+
+
+class NewPasswordAndOldPasswordNotMatchException(AppBaseException):
+    """Exception raised when the provided new password
+    and confirm password do not match."""
+
+    pass

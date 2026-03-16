@@ -17,15 +17,15 @@ def get_current_user(request: Request) -> dict[str, dict[str, Any]]:
     if not token:
         raise InvalidTokenException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            message="You must be logged in to access this resource"
+            message="You must be logged in to access this resource",
         )
 
     try:
         payload = jwt.decode(
             token, settings.token.secret_key, algorithms=settings.token.algorithm
         )
-        username: str = payload.get("sub")
-        if not username:
+        email: str = payload.get("sub")
+        if not email:
             raise InvalidTokenException(
                 status_code=status.HTTP_401_UNAUTHORIZED, message="Invalid token"
             )
@@ -33,6 +33,6 @@ def get_current_user(request: Request) -> dict[str, dict[str, Any]]:
         raise InvalidTokenException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             message="The token is invalid or has expired",
-        )
+        ) from None
 
-    return {"username": username, "payload": payload}
+    return {"email": email, "payload": payload}

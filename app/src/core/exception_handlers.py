@@ -51,6 +51,7 @@ def password_and_confirm_password_not_match_handlers(
         },
     )
 
+
 def invalid_token_handlers(
     request: Request, exc: InvalidCredentialsException
 ) -> JSONResponse:
@@ -103,4 +104,21 @@ def unhandled_exception_handler(request: Request, exc: Exception) -> JSONRespons
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "Internal server error.", "code": "INTERNAL_ERROR"},
+    )
+
+
+def new_password_and_old_password_not_match_handlers(
+    request: Request, exc: PasswordAndConfirmPasswordNotMatchException
+) -> JSONResponse:
+    logger.warning(
+        "New password and old password do not match | path: {} context: {}",
+        request.url.path,
+        exc.context,
+    )
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={
+            "detail": "New password and old password do not match.",
+            "code": "NEW_PASSWORD_OLD_PASSWORD_NOT_MATCH",
+        },
     )

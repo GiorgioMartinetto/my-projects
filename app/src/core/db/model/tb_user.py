@@ -34,4 +34,7 @@ class TbUser(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     def __repr__(self) -> str:
-        return f"<User(id={self.id}, email={self.email}, is_active={self.is_active})>"
+        return (
+            f"<User(id={self.id}, email={self.email}, username={self.username},"
+            f" is_active={self.is_active})>"
+        )

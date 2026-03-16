@@ -1,17 +1,23 @@
-
 from src.core.db.database import session_scope
 from src.core.db.model.tb_user import TbUser
 from src.core.db.repository.tb_user_repository import UserRepository
 from src.core.security import hash_password, verify_password
 from src.exceptions.user_exception import (
     EmailAlreadyExistsException,
+    NewPasswordAndOldPasswordNotMatchException,
     PasswordAndConfirmPasswordNotMatchException,
 )
 from src.routers.v1.user_endpoint import UserRegisterRequest
-from src.schemas.user_response import UserLoginResponse, UserRegisterResponse
+from src.schemas.user_request import UserUpdateRequest
+from src.schemas.user_response import (
+    UserDeleteResponse,
+    UserLoginResponse,
+    UserRegisterResponse,
+)
+from starlette import status
 
 
-async def _safe_existing_user(email: str) -> bool:
+def _safe_existing_user(email: str) -> bool:
     """
     Verifica se un utente con l'email specificata esiste già nel database.
 
@@ -27,12 +33,12 @@ async def _safe_existing_user(email: str) -> bool:
     """
     with session_scope() as session:
         repo = UserRepository(session)
-        exists = await repo.get_user_by_email(email=email) is not None
+        exists = repo.get_user_by_email(email=email) is not None
 
     return exists
 
 
-async def _safe_create_user(email: str, username: str, password: str) -> TbUser:
+def _safe_create_user(email: str, username: str, password: str) -> TbUser:
     """
     Crea un nuovo utente nel database con i dati specificati.
 
@@ -50,7 +56,7 @@ async def _safe_create_user(email: str, username: str, password: str) -> TbUser:
     """
     with session_scope() as session:
         repo = UserRepository(session)
-        new_user = await repo.create_user(
+        new_user = repo.create_user(
             email=email,
             username=username,
             hashed_password=password,
@@ -58,22 +64,105 @@ async def _safe_create_user(email: str, username: str, password: str) -> TbUser:
         return new_user
 
 
-async def _safe_authenticate_user(email: str, password: str) -> bool:
+def _safe_authenticate_user(email: str, password: str) -> TbUser | None:
+    """
+    Autentica un utente verificando che la password fornita
+    corrisponda a quella salvata.
+
+    Args:
+        email (str): L'indirizzo email utilizzato per identificare l'utente.
+        password (str): La password in chiaro fornita dall'utente.
+
+    Returns:
+        TbUser | None: L'utente autenticato scollegato dalla sessione
+                        oppure None se le credenziali non sono valide.
+
+    Note:
+        L'oggetto restituito contiene solo i campi essenziali e
+        non è legato alla sessione del database.
+    """
     with session_scope() as session:
         repo = UserRepository(session)
-        user = await repo.get_user_by_email(email=email)
+        user = repo.get_user_by_email(email=email)
         if not user:
-            return False
+            return None
         password_str = str(user.password_hash)
 
-    check_auth: bool = verify_password(
-        plain_password=password,
-        hashed_password=password_str,
-    )
-    return check_auth
+        if not verify_password(
+            plain_password=password,
+            hashed_password=password_str,
+        ):
+            return None
+
+        user_data = {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username,
+        }
+    detached_user = TbUser(**user_data)
+    return detached_user
 
 
-async def register_user(payload: UserRegisterRequest) -> UserRegisterResponse:
+def _safe_update_user(fields: dict[str, str], user_email: str) -> type[TbUser] | None:
+    """
+    Aggiorna in sicurezza i campi consentiti per l'utente specificato,
+    gestendo anche il cambio password.
+
+    Args:
+        fields (dict[str, str]): I campi da aggiornare e i valori associati.
+        user_email (str): L'indirizzo email dell'utente da modificare.
+
+    Returns:
+        TbUser | None: L'utente aggiornato oppure None se non è stato
+                        trovato alcun record.
+
+    Raises:
+        NewPasswordAndOldPasswordNotMatchException: Se la password
+        corrente non corrisponde a quella fornita.
+    """
+    with session_scope() as session:
+        repo = UserRepository(session)
+        current_user = repo.get_user_by_email(email=user_email)
+        if "new_password" in fields.keys():
+            check_password = verify_password(
+                plain_password=fields.get("old_password", ""),
+                hashed_password=str(current_user.password_hash),
+            )
+
+            if not check_password:
+                raise NewPasswordAndOldPasswordNotMatchException(
+                    message="Password and confirm password do not match.",
+                    context={"email": user_email},
+                    status_code=status.HTTP_409_CONFLICT,
+                )
+            fields.pop("old_password", None)
+            fields["password_hash"] = hash_password(fields.pop("new_password", ""))
+
+        updated_user = repo.update_user(
+            email=user_email,
+            fields=fields,
+        )
+        return updated_user
+
+
+def _safe_delete_user(email: str) -> type[TbUser] | None:
+    """
+    Elimina un utente dal database all'interno di una sessione transazionale sicura.
+
+    Args:
+        email (str): L'indirizzo email dell'utente da cancellare.
+
+    Returns:
+        TbUser | None: L'utente eliminato oppure None se l'email non esiste.
+    """
+    with session_scope() as session:
+        repo = UserRepository(session)
+        deleted_user = repo.delete_user(email=email)
+
+        return deleted_user
+
+
+def register_user(payload: UserRegisterRequest) -> UserRegisterResponse:
     """
     Registra un nuovo utente nel sistema.
 
@@ -98,7 +187,7 @@ async def register_user(payload: UserRegisterRequest) -> UserRegisterResponse:
         La password viene automaticamente hashata prima di essere salvata nel database
         per garantire la sicurezza.
     """
-    existing = await _safe_existing_user(email=payload.email)
+    existing = _safe_existing_user(email=payload.email)
     if existing:
         raise EmailAlreadyExistsException(
             message=f"Email {payload.email} already exists.",
@@ -113,7 +202,7 @@ async def register_user(payload: UserRegisterRequest) -> UserRegisterResponse:
 
     hashed_password = hash_password(payload.password)
 
-    new_user = await _safe_create_user(
+    new_user = _safe_create_user(
         email=payload.email, username=payload.name, password=hashed_password
     )
 
@@ -125,11 +214,22 @@ async def register_user(payload: UserRegisterRequest) -> UserRegisterResponse:
     )
 
 
-async def authenticate_user(email: str, password: str) -> UserLoginResponse | None:
-    existing = await _safe_existing_user(email=email)
-    authenticated = await _safe_authenticate_user(email=email, password=password)
+def authenticate_user(email: str, password: str) -> UserLoginResponse | None:
+    """
+    Gestisce il flusso di autenticazione applicativo
+    restituendo la risposta serializzata.
 
-    if not existing or not authenticated:
+    Args:
+        email (str): L'indirizzo email fornito in fase di login.
+        password (str): La password in chiaro inserita dall'utente.
+
+    Returns:
+        UserLoginResponse | None: La risposta di successo
+        se le credenziali sono valide, altrimenti None.
+    """
+    user = _safe_authenticate_user(email=email, password=password)
+
+    if not user:
         return None
 
     return UserLoginResponse.model_validate(
@@ -138,3 +238,51 @@ async def authenticate_user(email: str, password: str) -> UserLoginResponse | No
             "email": email,
         }
     )
+
+
+def update_user_data(
+    user_to_update: UserUpdateRequest, current_user
+) -> type[TbUser] | None:
+    """
+    Aggiorna i dati dell'utente autenticato in base ai campi forniti nella richiesta.
+
+    Args:
+        user_to_update (UserUpdateRequest): Il payload contenente i campi modificabili.
+        current_user (dict): Le informazioni dell'utente autenticato ottenute dal token.
+
+    Returns:
+        TbUser | None: L'utente aggiornato oppure None se non è stato trovato.
+    """
+    user_email = current_user.get("email", None)
+    user_fields = {
+        field: value
+        for field, value in user_to_update.model_dump().items()
+        if value is not None
+    } or None
+
+    user_updated = _safe_update_user(fields=user_fields, user_email=user_email)
+
+    return user_updated
+
+
+def user_deletion(user_email: str) -> UserDeleteResponse | None:
+    """
+    Cancella l'utente indicato e costruisce la risposta API coerente
+    con l'esito dell'operazione.
+
+    Args:
+        user_email (str): L'indirizzo email dell'utente da eliminare.
+
+    Returns:
+        UserDeleteResponse | None: La risposta di conferma se
+        l'eliminazione va a buon fine, altrimenti None.
+    """
+    user_deleted = _safe_delete_user(email=user_email)
+    if user_deleted:
+        return UserDeleteResponse.model_validate(
+            {
+                "message": "User deleted successfully.",
+                "email": user_deleted.email,
+            }
+        )
+    return None

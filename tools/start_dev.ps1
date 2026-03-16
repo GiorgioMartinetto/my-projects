@@ -6,3 +6,4 @@ Set-Location -Path app
 
 # Avvia uvicorn con reload
 uvicorn src.main:app --reload
+

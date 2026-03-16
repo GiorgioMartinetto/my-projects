@@ -21,10 +21,22 @@ class UserRegisterResponse(BaseModel):
     user: UserResponse
 
 
-class UserLoginResponse(BaseModel):
+class GenericUserResponse(BaseModel):
     message: str
-    email: str
+    email: EmailStr
 
 
-class UserLogoutResponse(BaseModel):
-    message: str
+class UserLoginResponse(GenericUserResponse):
+    pass
+
+
+class UserLogoutResponse(GenericUserResponse):
+    pass
+
+
+class UserUpdateResponse(GenericUserResponse):
+    pass
+
+
+class UserDeleteResponse(GenericUserResponse):
+    pass
