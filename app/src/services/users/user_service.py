@@ -1,3 +1,5 @@
+from typing import Any
+
 from src.core.db.database import session_scope
 from src.core.db.model.tb_user import TbUser
 from src.core.db.repository.tb_user_repository import UserRepository
@@ -7,8 +9,7 @@ from src.exceptions.user_exception import (
     NewPasswordAndOldPasswordNotMatchException,
     PasswordAndConfirmPasswordNotMatchException,
 )
-from src.routers.v1.user_endpoint import UserRegisterRequest
-from src.schemas.user_request import UserUpdateRequest
+from src.schemas.user_request import UserRegisterRequest, UserUpdateRequest
 from src.schemas.user_response import (
     UserDeleteResponse,
     UserLoginResponse,
@@ -103,7 +104,7 @@ def _safe_authenticate_user(email: str, password: str) -> TbUser | None:
     return detached_user
 
 
-def _safe_update_user(fields: dict[str, str], user_email: str) -> type[TbUser] | None:
+def _safe_update_user(user_email: str, fields: dict[str, str]) -> TbUser | None:
     """
     Aggiorna in sicurezza i campi consentiti per l'utente specificato,
     gestendo anche il cambio password.
@@ -123,7 +124,7 @@ def _safe_update_user(fields: dict[str, str], user_email: str) -> type[TbUser] |
     with session_scope() as session:
         repo = UserRepository(session)
         current_user = repo.get_user_by_email(email=user_email)
-        if "new_password" in fields.keys():
+        if current_user and "new_password" in fields:
             check_password = verify_password(
                 plain_password=fields.get("old_password", ""),
                 hashed_password=str(current_user.password_hash),
@@ -145,7 +146,7 @@ def _safe_update_user(fields: dict[str, str], user_email: str) -> type[TbUser] |
         return updated_user
 
 
-def _safe_delete_user(email: str) -> type[TbUser] | None:
+def _safe_delete_user(email: str) -> TbUser | None:
     """
     Elimina un utente dal database all'interno di una sessione transazionale sicura.
 
@@ -241,8 +242,8 @@ def authenticate_user(email: str, password: str) -> UserLoginResponse | None:
 
 
 def update_user_data(
-    user_to_update: UserUpdateRequest, current_user
-) -> type[TbUser] | None:
+    user_to_update: UserUpdateRequest, current_user: dict[str, Any]
+) -> TbUser | None:
     """
     Aggiorna i dati dell'utente autenticato in base ai campi forniti nella richiesta.
 
@@ -254,13 +255,18 @@ def update_user_data(
         TbUser | None: L'utente aggiornato oppure None se non è stato trovato.
     """
     user_email = current_user.get("email", None)
-    user_fields = {
+    if not isinstance(user_email, str):
+        return None
+    user_fields: dict[str, str] = {
         field: value
         for field, value in user_to_update.model_dump().items()
         if value is not None
-    } or None
+    }
 
-    user_updated = _safe_update_user(fields=user_fields, user_email=user_email)
+    if not user_fields:
+        return None
+
+    user_updated = _safe_update_user(user_email=user_email, fields=user_fields)
 
     return user_updated
 

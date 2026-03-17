@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "bcrypt==5.0.0",
     "fastapi==0.135.1",
+    "httpx==0.28.1",
     "loguru==0.7.3",
     "loguru-mypy==0.0.4",
     "mypy==1.19.1",
@@ -46,6 +47,8 @@ exclude = [
 [tool.mypy]
 python_version = 3.12
 strict = true
+mypy_path = "app"
+explicit_package_bases = true
 ignore_missing_imports = true
 warn_return_any = true
 disallow_untyped_defs = true

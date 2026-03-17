@@ -25,9 +25,11 @@ class UserRepository(BaseRepository):
         self.session.commit()
         return new_user
 
-    def update_user(self, email, fields) -> type[TbUser] | None:
+    def update_user(self, email: str, fields: dict[str, str]) -> TbUser | None:
         """Update an existing user's fields based on their email."""
-        user = self.session.query(TbUser).filter(TbUser.email == email).first()
+        user: TbUser | None = (
+            self.session.query(TbUser).filter(TbUser.email == email).first()
+        )
         if not user:
             return None
         for key, value in fields.items():
@@ -36,9 +38,11 @@ class UserRepository(BaseRepository):
         self.session.commit()
         return user
 
-    def delete_user(self, email: str) -> type[TbUser] | None:
+    def delete_user(self, email: str) -> TbUser | None:
         """Delete an existing user's fields based on their email."""
-        user = self.session.query(TbUser).filter(TbUser.email == email).first()
+        user: TbUser | None = (
+            self.session.query(TbUser).filter(TbUser.email == email).first()
+        )
         if not user:
             return None
         self.session.delete(user)

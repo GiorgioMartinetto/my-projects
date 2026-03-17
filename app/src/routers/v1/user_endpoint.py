@@ -77,9 +77,9 @@ def login(response: Response, user: UserLoginRequest) -> UserLoginResponse:
     Raises:
         InvalidCredentialsException: If the email/password combination is invalid.
     """
-    user = authenticate_user(email=user.email, password=user.password)
+    logged_user = authenticate_user(email=user.email, password=user.password)
 
-    if not user:
+    if not logged_user:
         raise InvalidCredentialsException(
             message="Invalid email or password.",
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -99,7 +99,7 @@ def login(response: Response, user: UserLoginRequest) -> UserLoginResponse:
         max_age=settings.token.expiration * 60,
     )
     logger.success("User logged in: {}", user.email)
-    return user
+    return logged_user
 
 
 @user_router.post(
@@ -157,7 +157,7 @@ def update_profile(
         UserUpdateResponse: Confirmation message with the updated email address.
     """
     user = update_user_data(user_to_update=user_to_update, current_user=current_user)
-    if user.email != current_user["email"]:
+    if user and user.email != current_user["email"]:
         # If the email was updated, we need to issue a new token with the new email
         token = create_access_token(
             data={"sub": user.email},
@@ -171,13 +171,20 @@ def update_profile(
             samesite=settings.token.same_site,
             max_age=settings.token.expiration * 60,
         )
-    logger.success("User updated successfully.")
-    return UserUpdateResponse.model_validate(
-        {
-            "message": "User updated successfully.",
-            "email": user.email,
-        }
-    )
+        logger.success("User updated successfully.")
+        return UserUpdateResponse.model_validate(
+            {
+                "message": "User updated successfully.",
+                "email": user.email,
+            }
+        )
+    else:
+        return UserUpdateResponse.model_validate(
+            {
+                "message": "User not updated.",
+                "email": current_user["email"],
+            }
+        )
 
 
 # @user_router.get(

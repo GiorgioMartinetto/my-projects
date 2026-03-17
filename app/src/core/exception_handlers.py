@@ -1,3 +1,5 @@
+from typing import cast
+
 from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -11,11 +13,10 @@ from src.exceptions.user_exception import (
 from starlette import status
 
 
-def email_already_exists_handlers(
-    request: Request, exc: EmailAlreadyExistsException
-) -> JSONResponse:
+def email_already_exists_handlers(request: Request, exc: Exception) -> JSONResponse:
+    app_exc = cast(EmailAlreadyExistsException, exc)
     logger.warning(
-        "Email already exists | path: {} context: {}", request.url.path, exc.context
+        "Email already exists | path: {} context: {}", request.url.path, app_exc.context
     )
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
@@ -23,11 +24,10 @@ def email_already_exists_handlers(
     )
 
 
-def user_not_found_handlers(
-    request: Request, exc: UserNotFoundException
-) -> JSONResponse:
+def user_not_found_handlers(request: Request, exc: Exception) -> JSONResponse:
+    app_exc = cast(UserNotFoundException, exc)
     logger.warning(
-        "User not found | path: {} context: {}", request.url.path, exc.context
+        "User not found | path: {} context: {}", request.url.path, app_exc.context
     )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -36,12 +36,13 @@ def user_not_found_handlers(
 
 
 def password_and_confirm_password_not_match_handlers(
-    request: Request, exc: PasswordAndConfirmPasswordNotMatchException
+    request: Request, exc: Exception
 ) -> JSONResponse:
+    app_exc = cast(PasswordAndConfirmPasswordNotMatchException, exc)
     logger.warning(
         "Password and confirm password do not match | path: {} context: {}",
         request.url.path,
-        exc.context,
+        app_exc.context,
     )
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
@@ -52,11 +53,10 @@ def password_and_confirm_password_not_match_handlers(
     )
 
 
-def invalid_token_handlers(
-    request: Request, exc: InvalidCredentialsException
-) -> JSONResponse:
+def invalid_token_handlers(request: Request, exc: Exception) -> JSONResponse:
+    app_exc = cast(InvalidCredentialsException, exc)
     logger.warning(
-        "Invalid token | path: {} context: {}", request.url.path, exc.context
+        "Invalid token | path: {} context: {}", request.url.path, app_exc.context
     )
     return JSONResponse(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -64,11 +64,10 @@ def invalid_token_handlers(
     )
 
 
-def invalid_credentials_handlers(
-    request: Request, exc: InvalidCredentialsException
-) -> JSONResponse:
+def invalid_credentials_handlers(request: Request, exc: Exception) -> JSONResponse:
+    app_exc = cast(InvalidCredentialsException, exc)
     logger.warning(
-        "Invalid credential | path: {} context: {}", request.url.path, exc.context
+        "Invalid credential | path: {} context: {}", request.url.path, app_exc.context
     )
     return JSONResponse(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -76,12 +75,11 @@ def invalid_credentials_handlers(
     )
 
 
-def validation_error_handler(
-    request: Request, exc: RequestValidationError
-) -> JSONResponse:
+def validation_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    app_exc = cast(RequestValidationError, exc)
     errors = [
         {"field": ".".join(str(loc) for loc in e["loc"][1:]), "message": e["msg"]}
-        for e in exc.errors()
+        for e in app_exc.errors()
     ]
     logger.info(
         "Input validation error | path={} errors={}",
@@ -108,12 +106,14 @@ def unhandled_exception_handler(request: Request, exc: Exception) -> JSONRespons
 
 
 def new_password_and_old_password_not_match_handlers(
-    request: Request, exc: PasswordAndConfirmPasswordNotMatchException
+    request: Request, exc: Exception
 ) -> JSONResponse:
+    app_exc = cast(PasswordAndConfirmPasswordNotMatchException, exc)
+
     logger.warning(
         "New password and old password do not match | path: {} context: {}",
         request.url.path,
-        exc.context,
+        app_exc.context,
     )
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
