@@ -186,29 +186,6 @@ def update_profile(
             }
         )
 
-
-# @user_router.get(
-#     path="/profile",
-#     tags=["Profile"],
-#     status_code=status.HTTP_200_OK,
-#     summary="Get user profile",
-#     description="Endpoint to retrieve the profile information"
-#     " of the currently authenticated user.",
-# )
-# def get_profile(
-#     current_user: Annotated[dict[Any, Any], Depends(get_current_user)],
-# ) -> dict:
-#     """Return the cached identity information for the authenticated user.
-#
-#     Args:
-#         current_user: Principal resolved by `get_current_user` dependency.
-#
-#     Returns:
-#         dict: Canonicalized payload with email and supplementary metadata.
-#     """
-#     return {"email": current_user["username"], "details": current_user["payload"]}
-
-
 @user_router.delete(
     "/profile/delete",
     tags=["Profile"],
