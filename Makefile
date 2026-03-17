@@ -1,21 +1,22 @@
 .PHONY: check mypy format all
 mypy:
 	@echo "Running mypy type checks..."
-	mypy app/src tests/plan
+	mypy app/src
 
 check:
 	@echo "Running code checks..."
-	ruff check --fix app/src tests/plan
+	ruff check --fix app/src
 	$(MAKE) mypy
 
 
 format:
 	@echo "Formatting code..."
-	ruff format app/src tests/plan
+	ruff format app/src
 
 
 all:
 	@echo "Running all tasks..."
-	$(MAKE) check
 	$(MAKE) format
+	$(MAKE) check
+
 

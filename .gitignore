@@ -15,3 +15,5 @@ dist/
 build/
 .github/copilot-instructions.md
 .test_reports/
+.postman
+postman

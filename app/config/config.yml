@@ -10,7 +10,7 @@ app:
 logging:
   level: "INFO"
   json_format: false
-  file_enabled: false
+  file_enabled: true
   file_path: "logs/app.log"
   rotation: "10 MB"
   retention: "7 days"
