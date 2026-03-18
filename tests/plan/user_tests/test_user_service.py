@@ -14,7 +14,7 @@ APP_DIR = Path(__file__).resolve().parents[3] / "app"
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
-from src.exceptions.user_exception import (
+from src.exceptions.user_exceptions.user_exception import (
     EmailAlreadyExistsException,
     NewPasswordAndOldPasswordNotMatchException,
     PasswordAndConfirmPasswordNotMatchException,

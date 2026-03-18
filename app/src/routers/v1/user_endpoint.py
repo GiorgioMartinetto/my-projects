@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Response
 from loguru import logger
 from src.core.config import settings
 from src.core.security import create_access_token
-from src.exceptions.user_exception import (
+from src.exceptions.user_exceptions.user_exception import (
     InvalidCredentialsException,
     UserNotFoundException,
 )
@@ -133,7 +133,7 @@ def logout(
     )
 
 
-@user_router.put(
+@user_router.patch(
     path="/profile/update",
     tags=["Profile"],
     status_code=status.HTTP_200_OK,
@@ -185,6 +185,7 @@ def update_profile(
                 "email": current_user["email"],
             }
         )
+
 
 @user_router.delete(
     "/profile/delete",

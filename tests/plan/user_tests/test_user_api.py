@@ -14,7 +14,7 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 from jose import JWTError
-from src.exceptions.user_exception import InvalidTokenException
+from src.exceptions.user_exceptions.user_exception import InvalidTokenException
 from src.main import create_app
 from src.routers.deps import get_current_user
 from src.schemas.user_response import UserLoginResponse, UserRegisterResponse

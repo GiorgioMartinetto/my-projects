@@ -1,4 +1,4 @@
-from .base_exception import AppBaseException
+from src.exceptions.base_exception import AppBaseException
 
 
 class EmailAlreadyExistsException(AppBaseException):

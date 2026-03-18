@@ -4,7 +4,7 @@ from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from loguru import logger
-from src.exceptions.user_exception import (
+from src.exceptions.user_exceptions.user_exception import (
     EmailAlreadyExistsException,
     InvalidCredentialsException,
     PasswordAndConfirmPasswordNotMatchException,
