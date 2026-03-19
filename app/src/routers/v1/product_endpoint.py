@@ -38,7 +38,7 @@ def creation(
     product_data: ProductCreationRequest,
     current_user: Annotated[dict[Any, Any], Depends(get_current_user)],
 ) -> ProductResponse:
-    user_email = current_user.get("email")
+    user_email = current_user.get("email", "")
     product_created = product_creation(
         product_data=product_data,
         user_email=user_email,
@@ -58,7 +58,7 @@ def product_update(
     current_user: Annotated[dict[Any, Any], Depends(get_current_user)],
 ) -> ProductResponse:
     product_updated = product_to_update(
-        product_data=product_data, product_owner=current_user.get("email")
+        product_data=product_data, product_owner=current_user.get("email", "")
     )
     logger.success("Product updated successfully: {}", product_updated.name)
     return ProductResponse.model_validate(product_updated)
@@ -73,8 +73,8 @@ def product_update(
 def delete_product(
     product: ProductDeleteRequest,
     current_user: Annotated[dict[Any, Any], Depends(get_current_user)],
-):
-    created_product_by = current_user.get("email")
+) -> ProductDeletionResponse:
+    created_product_by = current_user.get("email", "")
     product_deleted = product_delete(product=product, product_owner=created_product_by)
     return ProductDeletionResponse.model_validate(product_deleted)
 
@@ -99,17 +99,17 @@ def product_all() -> ListProductsResponse:
     summary="Get a specific product",
     description="Get a specific product",
 )
-def product_get(product_name: str):
+def product_get(product_name: str) -> ProductResponse:
     product = get_single_product(product_name=product_name)
     logger.success("Product retrieved successfully: {}", product.name)
     return ProductResponse.model_validate(product)
 
 
-@product_router.post(
-    path="/filtered_products",
-    status_code=status.HTTP_200_OK,
-    summary="Filtered products",
-    description="Filtered products",
-)
-def product_filter():
-    pass
+# @product_router.post(
+#     path="/filtered_products",
+#     status_code=status.HTTP_200_OK,
+#     summary="Filtered products",
+#     description="Filtered products",
+# )
+# def product_filter():
+#     pass

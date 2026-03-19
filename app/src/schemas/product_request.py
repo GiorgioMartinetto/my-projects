@@ -8,13 +8,13 @@ class ProductCreationRequest(BaseModel):
     quantity: int
 
     @field_validator("price")
-    def price_must_be_greater_than_zero(cls, v):
+    def price_must_be_greater_than_zero(cls, v: float) -> float:
         if v <= 0:
             raise ValueError("price_must_be_greater_than_zero")
         return v
 
     @field_validator("quantity")
-    def quantity_must_be_greater_than_zero(cls, v):
+    def quantity_must_be_greater_than_zero(cls, v: int) -> int:
         if v <= 0:
             raise ValueError("quantity_must_be_greater_than_zero")
         return v
@@ -28,13 +28,13 @@ class ProductUpdateRequest(BaseModel):
     quantity: int | None = None
 
     @field_validator("price")
-    def price_must_be_greater_than_zero(cls, v):
+    def price_must_be_greater_than_zero(cls, v: float) -> float:
         if v <= 0:
             raise ValueError("price_must_be_greater_than_zero")
         return v
 
     @field_validator("quantity")
-    def quantity_must_be_greater_than_zero(cls, v):
+    def quantity_must_be_greater_than_zero(cls, v: int) -> int:
         if v <= 0:
             raise ValueError("quantity_must_be_greater_than_zero")
         return v

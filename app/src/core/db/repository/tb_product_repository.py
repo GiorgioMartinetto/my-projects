@@ -1,19 +1,25 @@
 from typing import Any
 
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 from src.core.db.model.tb_product import TbProduct
 from src.core.db.repository.base import BaseRepository
 
 
 class ProductRepository(BaseRepository):
-    def __init__(self, session) -> None:
+    def __init__(self, session: Session) -> None:
         super().__init__(session)
 
     # ------------------------------------------------------------------
     # Basic CRUD operations
     # ------------------------------------------------------------------
     def create_product(
-        self, name: str, price: float, email: str, quantity: int, description: str
+        self,
+        name: str,
+        price: float,
+        email: str,
+        quantity: int,
+        description: str | None = None,
     ) -> TbProduct:
         new_product = TbProduct(
             name=name,

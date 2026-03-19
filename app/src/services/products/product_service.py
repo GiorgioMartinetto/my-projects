@@ -47,12 +47,14 @@ def _safe_product_creation(
 def _safe_product_update(fields: dict[str, Any], product_owner: str) -> TbProduct:
     with session_scope() as session:
         repo = ProductRepository(session)
-        product = repo.get_product_by_name(name=fields.get("name"))
+        product_name = fields.get("name", "")
+
+        product = repo.get_product_by_name(name=product_name)
         if not product:
             raise ProductNotFoundException(
                 message="Product not in catalog.",
                 context={
-                    "product_name": fields.get("name"),
+                    "product_name": product_name,
                     "product_owner": product_owner,
                 },
             )
@@ -61,7 +63,7 @@ def _safe_product_update(fields: dict[str, Any], product_owner: str) -> TbProduc
             raise ProductCanOnlyBeModifiedByTheCreatorException(
                 message="Product can't be updated by this user.",
                 context={
-                    "product_name": fields.get("name"),
+                    "product_name": product_name,
                     "product_owner": product_owner,
                 },
             )
@@ -80,7 +82,7 @@ def _safe_product_deletion(name: str, product_owner: str) -> bool:
         product = repo.get_product_by_name(name=name)
         if not product:
             raise ProductNotFoundException(
-                message="Product not found.",
+                message="Product not found. Please check the name.",
                 context={"product_name": name, "product_owner": product_owner},
             )
 
@@ -99,7 +101,7 @@ def _safe_get_all_products() -> list[TbProduct]:
         products = repo.get_all_products()
         if not products:
             raise ProductNotFoundException(
-                message="Product not found.",
+                message="Something went wrong. The products list is empty.",
                 context={"product_name": "", "product_owner": ""},
             )
         return products
