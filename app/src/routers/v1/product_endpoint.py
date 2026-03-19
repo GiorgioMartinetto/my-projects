@@ -66,7 +66,7 @@ def product_update(
 
 @product_router.delete(
     path="/delete",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
     summary="Delete an existing product",
     description="Delete an existing product",
 )
@@ -103,13 +103,3 @@ def product_get(product_name: str) -> ProductResponse:
     product = get_single_product(product_name=product_name)
     logger.success("Product retrieved successfully: {}", product.name)
     return ProductResponse.model_validate(product)
-
-
-# @product_router.post(
-#     path="/filtered_products",
-#     status_code=status.HTTP_200_OK,
-#     summary="Filtered products",
-#     description="Filtered products",
-# )
-# def product_filter():
-#     pass
