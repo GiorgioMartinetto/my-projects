@@ -3,7 +3,7 @@ from typing import Any
 from fastapi import Request
 from jose import JWTError, jwt
 from src.core.config import settings
-from src.exceptions.user_exception import InvalidTokenException
+from src.exceptions.user_exceptions.user_exception import InvalidTokenException
 from starlette import status
 
 

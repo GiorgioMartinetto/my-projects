@@ -3,9 +3,9 @@
 __pycache__/
 *.pyc
 .DS_Store
-env/
-.env
-.env.*
+
+local.env
+
 .vscode/
 logs/
 *.log

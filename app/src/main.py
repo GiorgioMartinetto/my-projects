@@ -5,7 +5,28 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from src.core.config import settings
-from src.core.exception_handlers import (
+from src.core.logger import LoggingMiddleware, setup_logger
+from src.exceptions.product_exceptions.product_exception import (
+    ProductAlreadyExistsException,
+    ProductCanBeDeleteOnlyByTheCreatorException,
+    ProductCanOnlyBeModifiedByTheCreatorException,
+    ProductNotFoundException,
+)
+from src.exceptions.product_exceptions.product_exception_handlers import (
+    product_already_exists_handlers,
+    product_can_be_deleted_by_creator,
+    product_can_only_be_modified_by_the_creator,
+    product_not_found_handlers,
+)
+from src.exceptions.user_exceptions.user_exception import (
+    EmailAlreadyExistsException,
+    InvalidCredentialsException,
+    InvalidTokenException,
+    NewPasswordAndOldPasswordNotMatchException,
+    PasswordAndConfirmPasswordNotMatchException,
+    UserNotFoundException,
+)
+from src.exceptions.user_exceptions.user_exception_handlers import (
     email_already_exists_handlers,
     invalid_credentials_handlers,
     invalid_token_handlers,
@@ -15,33 +36,33 @@ from src.core.exception_handlers import (
     user_not_found_handlers,
     validation_error_handler,
 )
-from src.core.logger import LoggingMiddleware, setup_logger
-from src.exceptions.user_exception import (
-    EmailAlreadyExistsException,
-    InvalidCredentialsException,
-    InvalidTokenException,
-    NewPasswordAndOldPasswordNotMatchException,
-    PasswordAndConfirmPasswordNotMatchException,
-    UserNotFoundException,
-)
+from src.routers.v1.product_endpoint import product_router
 from src.routers.v1.user_endpoint import user_router
 
 logger = setup_logger()
 
 
 def create_app() -> FastAPI:
-    _app = FastAPI(title=settings.app.name, version=settings.app.version)
+    _app = FastAPI(
+        title=settings.app.name,
+        version=settings.app.version,
+        swagger_ui_parameters={
+            "operationsSorter": "method",
+            "tagsSorter": "alpha",
+        },
+    )
     _app.add_middleware(LoggingMiddleware)
     _app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # ← restringi in produzione
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
     _app.include_router(router=user_router)
+    _app.include_router(router=product_router)
 
-    # Domain-specific exception handlers
+    # User Domain-specific exception handlers
     _app.add_exception_handler(
         EmailAlreadyExistsException, email_already_exists_handlers
     )
@@ -57,6 +78,19 @@ def create_app() -> FastAPI:
     _app.add_exception_handler(
         NewPasswordAndOldPasswordNotMatchException,
         new_password_and_old_password_not_match_handlers,
+    )
+    # Product Domain-specific exception handlers
+    _app.add_exception_handler(
+        ProductAlreadyExistsException, product_already_exists_handlers
+    )
+    _app.add_exception_handler(
+        ProductCanBeDeleteOnlyByTheCreatorException, product_can_be_deleted_by_creator
+    )
+
+    _app.add_exception_handler(ProductNotFoundException, product_not_found_handlers)
+    _app.add_exception_handler(
+        ProductCanOnlyBeModifiedByTheCreatorException,
+        product_can_only_be_modified_by_the_creator,
     )
 
     # Pydantic validation error handler

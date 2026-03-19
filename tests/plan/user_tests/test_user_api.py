@@ -14,7 +14,7 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 from jose import JWTError
-from src.exceptions.user_exception import InvalidTokenException
+from src.exceptions.user_exceptions.user_exception import InvalidTokenException
 from src.main import create_app
 from src.routers.deps import get_current_user
 from src.schemas.user_response import UserLoginResponse, UserRegisterResponse
@@ -129,7 +129,7 @@ def test_update_profile_without_email_change_does_not_refresh_cookie(
     monkeypatch.setattr("src.routers.v1.user_endpoint.update_user_data", update_mock)
     monkeypatch.setattr("src.routers.v1.user_endpoint.create_access_token", token_mock)
 
-    response = client.put("/user/profile/update", json={"username": "John Updated"})
+    response = client.patch("/user/profile/update", json={"username": "John Updated"})
 
     assert response.status_code == 200
     assert response.json()["email"] == "john@example.com"
@@ -144,7 +144,7 @@ def test_update_profile_with_email_change_refreshes_cookie(client, app, monkeypa
     monkeypatch.setattr("src.routers.v1.user_endpoint.update_user_data", update_mock)
     monkeypatch.setattr("src.routers.v1.user_endpoint.create_access_token", token_mock)
 
-    response = client.put("/user/profile/update", json={"email": "new@example.com"})
+    response = client.patch("/user/profile/update", json={"email": "new@example.com"})
 
     assert response.status_code == 200
     assert response.json()["email"] == "new@example.com"
@@ -155,7 +155,7 @@ def test_update_profile_with_email_change_refreshes_cookie(client, app, monkeypa
 def test_update_profile_with_no_fields_returns_422(client, app):
     app.dependency_overrides[get_current_user] = lambda: {"email": "john@example.com"}
 
-    response = client.put("/user/profile/update", json={})
+    response = client.patch("/user/profile/update", json={})
 
     assert response.status_code == 422
     assert response.json()["code"] == "VALIDATION_ERROR"

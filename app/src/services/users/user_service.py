@@ -4,7 +4,7 @@ from src.core.db.database import session_scope
 from src.core.db.model.tb_user import TbUser
 from src.core.db.repository.tb_user_repository import UserRepository
 from src.core.security import hash_password, verify_password
-from src.exceptions.user_exception import (
+from src.exceptions.user_exceptions.user_exception import (
     EmailAlreadyExistsException,
     NewPasswordAndOldPasswordNotMatchException,
     PasswordAndConfirmPasswordNotMatchException,
