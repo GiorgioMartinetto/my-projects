@@ -8,7 +8,7 @@ from src.core.db.model import Base
 
 class TbCategory(Base):
     __tablename__ = "categories"
-    id: Mapped[UUID] = mapped_column(
+    id: Mapped[UUID[str]] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid4()), nullable=False
     )
     category_name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)

@@ -4,11 +4,11 @@ from fastapi import APIRouter, Depends
 from loguru import logger
 from src.routers.deps import get_current_user
 from src.schemas.category_request import CategoryRequest
-from src.schemas.category_response import CategoryResponse, CategoryDeleteResponse
+from src.schemas.category_response import CategoryDeleteResponse, CategoryResponse
 from src.services.products.category_service import (
     create_new_category,
-    get_all_categories,
     delete_category,
+    get_all_categories,
 )
 from starlette import status
 
@@ -58,9 +58,9 @@ def list_categories() -> list[CategoryResponse]:
     description="Delete a category",
 )
 def category_delete(
-        category: CategoryRequest,
-        current_user: Annotated[dict[Any, Any], Depends(get_current_user)],
+    category: CategoryRequest,
+    current_user: Annotated[dict[Any, Any], Depends(get_current_user)],
 ) -> CategoryDeleteResponse:
     category_name = category.name
-    check_category_delete= delete_category(category_name=category_name)
+    check_category_delete = delete_category(category_name=category_name)
     return CategoryDeleteResponse.model_validate(check_category_delete)

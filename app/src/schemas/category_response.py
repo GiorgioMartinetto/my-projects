@@ -12,9 +12,11 @@ class CategoryResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
 class CategoryGenericResponse(BaseModel):
     message: str
     category_name: str
+
 
 class CategoryDeleteResponse(CategoryGenericResponse):
     pass

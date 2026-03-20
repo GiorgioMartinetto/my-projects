@@ -8,7 +8,7 @@ class CategoryRepository(BaseRepository):
     def __init__(self, session: Session) -> None:
         super().__init__(session)
 
-    def get_category_by_name(self, category_name: str) -> TbCategory:
+    def get_category_by_name(self, category_name: str) -> TbCategory | None:
         category = self.session.execute(
             select(TbCategory).where(TbCategory.category_name == category_name)
         ).scalar_one_or_none()
@@ -23,13 +23,12 @@ class CategoryRepository(BaseRepository):
         self.session.commit()
         return new_category
 
-    def get_all_categories(self):
+    def get_all_categories(self) -> list[TbCategory]:
         categories = self.session.execute(select(TbCategory)).scalars().all()
-        return categories
+        return list(categories)
 
-    def delete_category(self, category: TbCategory):
+    def delete_category(self, category: TbCategory) -> bool:
         try:
-
             self.session.delete(category)
             self.session.commit()
 

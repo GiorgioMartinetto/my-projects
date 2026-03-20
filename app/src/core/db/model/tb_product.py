@@ -22,7 +22,7 @@ class TbProduct(Base):
 
     __tablename__ = "products"
 
-    id: Mapped[UUID] = mapped_column(
+    id: Mapped[UUID[str]] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid4()), nullable=False
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)

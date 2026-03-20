@@ -5,10 +5,10 @@ class CategoryRequest(BaseModel):
     name: str
 
     @field_validator("name")
-    def validate_name(cls, v):
-        if not v.isalpha():
+    def validate_name(cls, value: str) -> str:
+        if not value.isalpha():
             raise ValueError("Name must be alphabetical")
-        if not 2 <= len(v) <= 20:
+        if not 2 <= len(value) <= 20:
             raise ValueError("Name length must be between 2 and 20 characters")
 
-        return v
+        return value

@@ -1,4 +1,3 @@
-
 from loguru import logger
 from src.core.db.database import session_scope
 from src.core.db.model.tb_category import TbCategory
@@ -18,21 +17,21 @@ def _safe_create_new_category(category_name: str, user_email: str) -> TbCategory
         return new_category
 
 
-def _get_category_by_name(category_name):
+def _get_category_by_name(category_name: str) -> TbCategory | None:
     with session_scope() as session:
         repo = CategoryRepository(session)
         category = repo.get_category_by_name(category_name)
         return category
 
 
-def _safe_all_categories():
+def _safe_all_categories() -> list[TbCategory]:
     with session_scope() as session:
         repo = CategoryRepository(session)
         categories = repo.get_all_categories()
         return categories
 
 
-def _safe_delete_category(category_name: str):
+def _safe_delete_category(category_name: str) -> bool:
     with session_scope() as session:
         repo = CategoryRepository(session)
         existing_category = repo.get_category_by_name(category_name)
@@ -66,7 +65,7 @@ def get_all_categories() -> list[TbCategory]:
     return categories
 
 
-def delete_category(category_name: str):
+def delete_category(category_name: str) -> dict[str, str]:
     check_category_delete = _safe_delete_category(category_name=category_name)
 
     if check_category_delete:

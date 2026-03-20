@@ -20,7 +20,7 @@ class TbUser(Base):
 
     __tablename__ = "users"
 
-    id: Mapped[UUID] = mapped_column(
+    id: Mapped[UUID[str]] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid4()), nullable=False
     )
     email: Mapped[str] = mapped_column(
