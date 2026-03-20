@@ -6,6 +6,12 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from src.core.config import settings
 from src.core.logger import LoggingMiddleware, setup_logger
+from src.exceptions.product_exceptions.category_exception import (
+    CategoryAlreadyExistsException,
+)
+from src.exceptions.product_exceptions.category_exception_handlers import (
+    category_already_exists_exception_handler,
+)
 from src.exceptions.product_exceptions.product_exception import (
     ProductAlreadyExistsException,
     ProductCanBeDeleteOnlyByTheCreatorException,
@@ -36,6 +42,7 @@ from src.exceptions.user_exceptions.user_exception_handlers import (
     user_not_found_handlers,
     validation_error_handler,
 )
+from src.routers.v1.category_endpoint import category_router
 from src.routers.v1.product_endpoint import product_router
 from src.routers.v1.user_endpoint import user_router
 
@@ -61,6 +68,7 @@ def create_app() -> FastAPI:
     )
     _app.include_router(router=user_router)
     _app.include_router(router=product_router)
+    _app.include_router(router=category_router)
 
     # User Domain-specific exception handlers
     _app.add_exception_handler(
@@ -93,9 +101,11 @@ def create_app() -> FastAPI:
         product_can_only_be_modified_by_the_creator,
     )
 
+    _app.add_exception_handler(
+        CategoryAlreadyExistsException, category_already_exists_exception_handler
+    )
     # Pydantic validation error handler
     _app.add_exception_handler(RequestValidationError, validation_error_handler)
-
     _app.add_exception_handler(Exception, unhandled_exception_handler)
 
     return _app

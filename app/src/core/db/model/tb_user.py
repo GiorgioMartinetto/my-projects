@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy import UUID, Boolean, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
 from src.core.db.model import Base
 
@@ -20,7 +20,7 @@ class TbUser(Base):
 
     __tablename__ = "users"
 
-    id: Mapped[str] = mapped_column(
+    id: Mapped[UUID[str]] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid4()), nullable=False
     )
     email: Mapped[str] = mapped_column(

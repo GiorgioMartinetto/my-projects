@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import UUID, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 from src.core.db.model import Base
 
@@ -22,7 +22,7 @@ class TbProduct(Base):
 
     __tablename__ = "products"
 
-    id: Mapped[str] = mapped_column(
+    id: Mapped[UUID[str]] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid4()), nullable=False
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
