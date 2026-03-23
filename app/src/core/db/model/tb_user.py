@@ -37,6 +37,7 @@ user = session.query(TbUser).filter_by(email="mario@example.com").one_or_none()
 # progetto richiede un controllo centrale delle transazioni.
 
 """
+
 from datetime import UTC, datetime
 from uuid import uuid4
 

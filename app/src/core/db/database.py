@@ -34,6 +34,7 @@ Note importanti:
 
 Autore: progetto sperimentale (documentazione aggiunta)
 """
+
 from collections.abc import Generator
 from contextlib import contextmanager
 from urllib.parse import quote_plus
@@ -60,7 +61,7 @@ def _build_database_url() -> str:
 
     Esempio:
         >>> _build_database_url()
-        'postgresql+psycopg2://alice:pa%24%24w0rd@db.example.com:5432/mydb'
+        'postgresql+psycopg2://alice:fake@db.example.com:5432/mydb'
 
     Nota:
         Questo helper dipende da `_db_config` che è preso da `settings.database`.
