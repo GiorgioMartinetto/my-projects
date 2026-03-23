@@ -789,4 +789,4 @@ Consigli pratici
 - Prima di creare una categoria, verifica (opzionalmente) l'esistenza per fornire messaggi user-friendly invece di affidarsi solo al vincolo di unicità del DB.
 - Per la cancellazione valuta l'uso di soft delete (`is_deleted`) per mantenere lo storico e prevenire problemi con prodotti già associati.
 
-Vuoi che aggiunga esempi di risposta JSON o test automatici (pytest) per questi endpoint? 
+
