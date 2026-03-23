@@ -39,6 +39,7 @@ select = [
     "B",    # Bug potenziali (flake8-bugbear)
     "UP",   # Migliorie sintattiche moderne
 ]
+ignore = ["E501"]
 exclude = [
     ".venv",
     "__pycache__"
